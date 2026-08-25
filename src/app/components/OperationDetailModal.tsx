@@ -91,7 +91,7 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
             )}
 
             {operation.comision && (
-              <DetailRow icon={<DollarSign className="w-4 h-4" />} label="Comisión" value={`$${operation.comision.toLocaleString("es-MX")} MXN`} highlight highlightColor="text-[#F9D35A]" />
+              <DetailRow icon={<DollarSign className="w-4 h-4" />} label="Comisión" value={`$${operation.comision.toLocaleString("es-MX")} MXN`} highlight highlightColor="text-green-600" />
             )}
           </div>
 
