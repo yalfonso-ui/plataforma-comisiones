@@ -1,35 +1,54 @@
-import { Building2, CreditCard, Hash, Mail } from "lucide-react";
+import { Building2, CreditCard, Hash, Mail, User } from "lucide-react";
+import { useAppStore } from "../store/appStore";
 
 export function AgentInfoCard() {
+  // Placeholder data - Replace with actual agent data from backend
+  const placeholderData = {
+    beneficiario: "María García López",
+    banco: "BBVA Bancomer",
+    clabe: "012180001234567890",
+    cuenta: "1234567890",
+    correo: "maria.garcia@email.com",
+    nivel: "Nivel 2 - Comercial Senior"
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-[#00184C] mb-4">Información del Agente</h3>
-      
+      <div className="flex items-center gap-2 mb-4">
+        <h3 className="text-[#00184C]">Información del Agente</h3>
+        <span className="text-xs px-2 py-1 bg-amber-100 text-amber-700 rounded-full">Demo</span>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <InfoItem
-          icon={<CreditCard className="w-4 h-4" />}
+          icon={<User className="w-4 h-4" />}
           label="Beneficiario"
-          value="Agente XXXXXXXX – validar todos los niveles"
+          value={placeholderData.beneficiario}
+        />
+        <InfoItem
+          icon={<Hash className="w-4 h-4" />}
+          label="Nivel"
+          value={placeholderData.nivel}
         />
         <InfoItem
           icon={<Building2 className="w-4 h-4" />}
           label="Banco"
-          value="BBVA Bancomer"
+          value={placeholderData.banco}
         />
         <InfoItem
           icon={<Hash className="w-4 h-4" />}
           label="Clabe interbancaria"
-          value="012180001234567890"
+          value={placeholderData.clabe}
         />
         <InfoItem
-          icon={<Hash className="w-4 h-4" />}
+          icon={<CreditCard className="w-4 h-4" />}
           label="Número de cuenta"
-          value="0123456789"
+          value={placeholderData.cuenta}
         />
         <InfoItem
           icon={<Mail className="w-4 h-4" />}
           label="Correo"
-          value="agente@example.com"
+          value={placeholderData.correo}
         />
       </div>
     </div>

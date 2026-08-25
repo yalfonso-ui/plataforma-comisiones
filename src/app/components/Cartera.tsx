@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { Search, Filter, ArrowUpDown, CheckCircle2, Clock, FileText, Eye, Info, AlertCircle, Hourglass, X, RotateCcw, ChevronDown } from "lucide-react";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
+import { OperationDetailModal } from "./OperationDetailModal";
 import { useAppStore, Operation } from "../store/appStore";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
@@ -19,6 +20,7 @@ export function Cartera() {
   const [statusFilter, setStatusFilter] = useState<Status | "all">("all");
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showStatusGuide, setShowStatusGuide] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -72,18 +74,34 @@ export function Cartera() {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    updateOperationStatus(voucher, "disponible");
+    updateOperationStatus(voucher, "confirmado");
     setShowModal(false);
     setSelectedOperation(null);
     setIsLoading(false);
-    
+
     toast.success("Pago confirmado exitosamente", {
-      description: `El voucher ${voucher} está ahora disponible para facturar`,
+      description: `El voucher ${voucher} ha sido confirmado. Una vez disponible, podrás facturarlo.`,
       action: {
         label: "Ir a Facturar",
         onClick: () => navigate("/facturar"),
       },
     });
+  };
+
+  const handleMarkDisponible = (voucher: string) => {
+    updateOperationStatus(voucher, "disponible");
+    toast.success("Operación disponible para facturar", {
+      description: `El voucher ${voucher} ahora está listo para incluir en una factura`,
+      action: {
+        label: "Ir a Facturar",
+        onClick: () => navigate("/facturar"),
+      },
+    });
+  };
+
+  const handleViewDetail = (operation: Operation) => {
+    setSelectedOperation(operation);
+    setShowDetailModal(true);
   };
 
   return (
@@ -321,7 +339,10 @@ export function Cartera() {
                           Confirmar pago
                         </button>
                       )}
-                      <button className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewDetail(operation)}
+                        className="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
+                      >
                         <Eye className="w-4 h-4" />
                         Ver detalle
                       </button>
@@ -344,6 +365,18 @@ export function Cartera() {
           }}
           onConfirm={handleConfirmPayment}
           isLoading={isLoading}
+        />
+      )}
+
+      {/* Operation Detail Modal */}
+      {showDetailModal && selectedOperation && (
+        <OperationDetailModal
+          operation={selectedOperation}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedOperation(null);
+          }}
+          onMarkDisponible={handleMarkDisponible}
         />
       )}
     </div>

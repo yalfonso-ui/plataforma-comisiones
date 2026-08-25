@@ -1,4 +1,5 @@
 import image_adf3a2c3cf8ac57f3434f58f1db39bba506cdf49 from 'figma:asset/adf3a2c3cf8ac57f3434f58f1db39bba506cdf49.png'
+import logoContinental from "../../assets/Logo continental.png";
 import { Outlet, NavLink } from "react-router";
 import { AgentInfoCard } from "./AgentInfoCard";
 import { useAppStore } from "../store/appStore";
@@ -19,9 +20,9 @@ export function DashboardLayout() {
             <div className="flex items-center gap-2">
               <div className="w-30 h-13  rounded-lg flex items-center justify-center overflow-hidden">
                 <ImageWithFallback 
-                  src= ""
-                  alt="Comisiones Logo"
-                  className="w-full h-full object-cover"
+                  src={logoContinental}
+                  alt="Logo Continental"
+                  className="w-full h-full object-contain"
                 />
               </div>
               

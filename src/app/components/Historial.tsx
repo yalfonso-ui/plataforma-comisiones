@@ -27,29 +27,8 @@ export function Historial() {
     });
   }, [invoices, filter, dateRange]);
 
-  // Mock data si no hay facturas
-  const displayInvoices = filteredInvoices.length > 0 ? filteredInvoices : [
-    {
-      id: "INV-001",
-      fecha: "2024-03-01",
-      vouchers: ["VCH-2024-010", "VCH-2024-011"],
-      totalComision: 28500,
-      totalLiquidado: 228000,
-      xmlFileName: "factura-marzo-001.xml",
-      pdfFileName: "factura-marzo-001.pdf",
-      status: "aprobada" as const,
-    },
-    {
-      id: "INV-002",
-      fecha: "2024-02-15",
-      vouchers: ["VCH-2024-008", "VCH-2024-009"],
-      totalComision: 45000,
-      totalLiquidado: 360000,
-      xmlFileName: "factura-febrero-002.xml",
-      pdfFileName: "factura-febrero-002.pdf",
-      status: "aprobada" as const,
-    },
-  ];
+  // Mostrar solo facturas reales del store
+  const displayInvoices = filteredInvoices;
 
   return (
     <div className="space-y-6">
