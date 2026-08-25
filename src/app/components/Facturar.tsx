@@ -267,7 +267,7 @@ export function Facturar() {
             </div>
             <div>
               <p className="text-sm text-white/70 mb-1">Total comisión</p>
-              <p className="text-2xl font-bold text-[#F9D35A]">
+              <p className="text-2xl font-bold text-green-400">
                 ${totalComision.toLocaleString("es-MX")} MXN
               </p>
             </div>

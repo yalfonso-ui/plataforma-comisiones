@@ -3,11 +3,25 @@ import { FileText, Download, Eye, CheckCircle2, Clock, XCircle } from "lucide-re
 import { useAppStore } from "../store/appStore";
 import { DateFilter } from "./DateFilter";
 import { useDateFilterStore, getDateRange } from "../store/dateFilterStore";
+import { toast } from "sonner";
 
 export function Historial() {
   const invoices = useAppStore((state) => state.invoices);
   const [filter, setFilter] = useState<"all" | "procesando" | "aprobada" | "rechazada">("all");
   const { period, customStartDate, customEndDate } = useDateFilterStore();
+
+  const handleViewInvoice = (invoiceId: string) => {
+    toast.info(`Vista previa de factura ${invoiceId}`, {
+      description: "La previsualización estará disponible en producción",
+    });
+  };
+
+  const handleDownloadInvoice = (invoice: typeof invoices[0], type: "xml" | "pdf") => {
+    const fileName = type === "xml" ? invoice.xmlFileName : invoice.pdfFileName;
+    toast.success(`Descargando ${fileName}`, {
+      description: "La descarga real estará disponible en producción",
+    });
+  };
 
   // Calculate date range
   const dateRange = useMemo(() => {
@@ -155,10 +169,25 @@ export function Historial() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">
-                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <button
+                          onClick={() => handleViewInvoice(invoice.id)}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Ver detalle"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
+                        <button
+                          onClick={() => handleDownloadInvoice(invoice, "pdf")}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Descargar PDF"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDownloadInvoice(invoice, "xml")}
+                          className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          title="Descargar XML"
+                        >
                           <Download className="w-4 h-4" />
                         </button>
                       </div>

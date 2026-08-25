@@ -89,7 +89,7 @@ export function ConfirmInvoiceModal({
               
               <div className="flex justify-between text-sm pt-3 border-t border-gray-200">
                 <span className="text-gray-600">Total comisión:</span>
-                <span className="font-bold text-[#F9D35A] text-lg">
+                <span className="font-bold text-green-600 text-lg">
                   ${totalComision.toLocaleString("es-MX")} MXN
                 </span>
               </div>
