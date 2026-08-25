@@ -109,14 +109,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   availableOperationsCount: 9,
   
   updateOperationStatus: (voucher, status) => {
-    set((state) => ({
-      operations: state.operations.map((op) =>
+    set((state) => {
+      const updatedOperations = state.operations.map((op) =>
         op.voucher === voucher ? { ...op, status } : op
-      ),
-      availableOperationsCount: state.operations.filter(op => 
-        op.voucher === voucher ? status === "disponible" : op.status === "disponible"
-      ).length,
-    }));
+      );
+      const availableCount = updatedOperations.filter(op => op.status === "disponible").length;
+      return {
+        operations: updatedOperations,
+        availableOperationsCount: availableCount,
+      };
+    });
   },
   
   addInvoice: (invoice: Invoice) => {

@@ -29,7 +29,7 @@ export function DashboardLayout() {
             </div>
             
             {/* Navigation */}
-            <nav className="flex gap-1">
+              <nav className="flex gap-1">
               <NavLink
                 to="/resumen"
                 className={({ isActive }) =>
@@ -66,7 +66,10 @@ export function DashboardLayout() {
               >
                 Facturar
                 {availableCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#F9D35A] text-[#00184C] text-xs font-bold rounded-full flex items-center justify-center animate-pulse">
+                  <span
+                    title={`${availableCount} operación${availableCount > 1 ? 'es' : ''} lista${availableCount > 1 ? 's' : ''} para facturar`}
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-[#F9D35A] text-[#00184C] text-xs font-bold rounded-full flex items-center justify-center animate-pulse cursor-help"
+                  >
                     {availableCount}
                   </span>
                 )}
