@@ -2,20 +2,27 @@ import { useState } from "react";
 import { Calendar, ChevronDown } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { useDateFilterStore, getDateRange } from "../store/dateFilterStore";
+import {
+  BTN_CTA,
+  BTN_SECONDARY,
+  TEXT_SECONDARY,
+  BORDER_DEFAULT,
+  BG_CANVAS,
+} from "../utils/ui";
 
 export function DateFilter() {
-  const { 
-    period, 
-    customStartDate, 
+  const {
+    period,
+    customStartDate,
     customEndDate,
     calendarStartDate,
     calendarEndDate,
-    setPeriod, 
+    setPeriod,
     setCustomDates,
     setCalendarDates,
-    clearCustomDates 
+    clearCustomDates
   } = useDateFilterStore();
-  
+
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const dateRange = getDateRange(period, customStartDate, customEndDate);
@@ -30,25 +37,25 @@ export function DateFilter() {
       <div className="relative ml-auto">
         <button
           onClick={() => setShowDatePicker(!showDatePicker)}
-          className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-lg hover:border-[#43D3FF] transition-colors"
+          className={`flex items-center gap-2 px-4 py-2 bg-white border ${BORDER_DEFAULT} rounded-lg hover:border-celeste transition-colors`}
         >
-          <Calendar className="w-4 h-4 text-[#00184C]" />
-          <span className="text-sm font-medium text-[#00184C] text-right">
+          <Calendar className="w-4 h-4 text-azul-oscuro" />
+          <span className="text-sm font-medium text-azul-oscuro text-right">
             {period === "mes-corrido" && "Mes Corrido"}
             {period === "ultimos-30" && "Últimos 30 días"}
             {period === "ultimos-90" && "Últimos 90 días"}
             {period === "personalizado" && "Personalizado"}
           </span>
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className={`w-4 h-4 ${TEXT_SECONDARY}`} />
         </button>
 
         {showDatePicker && (
           <>
-            <div 
-              className="fixed inset-0 z-20" 
+            <div
+              className="fixed inset-0 z-20"
               onClick={() => setShowDatePicker(false)}
             />
-            <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-30 p-4">
+            <div className={`absolute right-0 mt-2 w-80 bg-white border ${BORDER_DEFAULT} rounded-lg shadow-lg z-30 p-4`}>
               <div className="space-y-2">
                 <button
                   onClick={() => {
@@ -57,8 +64,8 @@ export function DateFilter() {
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     period === "mes-corrido"
-                      ? "bg-[#43D3FF] text-[#00184C] font-semibold"
-                      : "hover:bg-gray-100 text-gray-700"
+                      ? "bg-celeste text-azul-oscuro font-semibold"
+                      : `hover:bg-canvas ${TEXT_SECONDARY}`
                   }`}
                 >Mes Corrido</button>
                 <button
@@ -68,8 +75,8 @@ export function DateFilter() {
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     period === "ultimos-30"
-                      ? "bg-[#43D3FF] text-[#00184C] font-semibold"
-                      : "hover:bg-gray-100 text-gray-700"
+                      ? "bg-celeste text-azul-oscuro font-semibold"
+                      : `hover:bg-canvas ${TEXT_SECONDARY}`
                   }`}
                 >
                   Últimos 30 días
@@ -81,37 +88,37 @@ export function DateFilter() {
                   }}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     period === "ultimos-90"
-                      ? "bg-[#43D3FF] text-[#00184C] font-semibold"
-                      : "hover:bg-gray-100 text-gray-700"
+                      ? "bg-celeste text-azul-oscuro font-semibold"
+                      : `hover:bg-canvas ${TEXT_SECONDARY}`
                   }`}
                 >
                   Últimos 90 días
                 </button>
-                
-                <div className="border-t border-gray-200 my-2" />
-                
+
+                <div className={`border-t ${BORDER_DEFAULT} my-2`} />
+
                 <button
                   onClick={() => setPeriod("personalizado")}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     period === "personalizado"
-                      ? "bg-[#43D3FF] text-[#00184C] font-semibold"
-                      : "hover:bg-gray-100 text-gray-700"
+                      ? "bg-celeste text-azul-oscuro font-semibold"
+                      : `hover:bg-canvas ${TEXT_SECONDARY}`
                   }`}
                 >
                   Personalizado
                 </button>
-                
+
                 {period === "personalizado" && (
-                  <div className="space-y-3 mt-3 p-3 bg-gray-50 rounded-lg max-h-[500px] overflow-y-auto">
+                  <div className={`space-y-3 mt-3 p-3 ${BG_CANVAS} rounded-lg max-h-[500px] overflow-y-auto`}>
                     <div className="text-center">
-                      <p className="text-xs font-medium text-gray-700 mb-2">
+                      <p className={`text-xs font-medium ${TEXT_SECONDARY} mb-2`}>
                         {!calendarStartDate && !calendarEndDate && "Selecciona fecha de inicio"}
                         {calendarStartDate && !calendarEndDate && "Selecciona fecha de fin"}
                         {calendarStartDate && calendarEndDate && "Rango seleccionado"}
                       </p>
-                      
+
                       {calendarStartDate && calendarEndDate && (
-                        <div className="flex items-center justify-center gap-2 mb-2 text-xs text-[#00184C] bg-[#43D3FF]/20 rounded-lg p-2">
+                        <div className="flex items-center justify-center gap-2 mb-2 text-xs text-azul-oscuro bg-celeste-soft rounded-lg p-2">
                           <Calendar className="w-3 h-3" />
                           <span className="font-medium">
                             {calendarStartDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -121,7 +128,7 @@ export function DateFilter() {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="calendar-custom w-full flex justify-center">
                       <DayPicker
                         mode="range"
@@ -142,27 +149,27 @@ export function DateFilter() {
                           options: { weekStartsOn: 0 }
                         }}
                         modifiersClassNames={{
-                          selected: '!bg-[#43D3FF] !text-[#00184C] font-bold',
-                          today: 'border-2 border-[#F9D35A]',
-                          range_middle: '!bg-[#43D3FF]/30',
+                          selected: '!bg-celeste !text-azul-oscuro font-bold',
+                          today: 'border-2 border-amarillo',
+                          range_middle: '!bg-celeste-soft',
                         }}
                         className="text-sm scale-95"
                       />
                     </div>
-                    
+
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
                           clearCustomDates();
                         }}
-                        className="flex-1 px-3 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
+                        className={`${BTN_SECONDARY} flex-1 px-3 py-2 rounded-lg text-sm font-semibold`}
                       >
                         Limpiar
                       </button>
                       <button
                         onClick={() => setShowDatePicker(false)}
                         disabled={!calendarStartDate || !calendarEndDate}
-                        className="flex-1 px-3 py-2 bg-[#F9D35A] text-[#00184C] rounded-lg text-sm font-semibold hover:bg-[#f7c840] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className={`${BTN_CTA} flex-1 px-3 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
                         Aplicar
                       </button>
@@ -174,8 +181,8 @@ export function DateFilter() {
           </>
         )}
       </div>
-      
-      <p className="text-xs text-gray-500 text-right">{formatDateRange()}</p>
+
+      <p className={`text-xs ${TEXT_SECONDARY} text-right`}>{formatDateRange()}</p>
     </div>
   );
 }

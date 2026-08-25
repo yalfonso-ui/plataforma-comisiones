@@ -1,103 +1,159 @@
-import image_adf3a2c3cf8ac57f3434f58f1db39bba506cdf49 from 'figma:asset/adf3a2c3cf8ac57f3434f58f1db39bba506cdf49.png'
-import logoContinental from "../../assets/Logo continental.png";
-import { Outlet, NavLink } from "react-router";
+import { Outlet, useNavigate } from "react-router";
 import { AgentInfoCard } from "./AgentInfoCard";
+import { Breadcrumb } from "./Breadcrumb";
 import { useAppStore } from "../store/appStore";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Menu, HelpCircle } from "lucide-react";
+import { OnboardingModal } from "./OnboardingModal";
+import { NotificationsBell } from "./NotificationsBell";
+import { UserMenu } from "./UserMenu";
+import { MobileMenuDrawer } from "./MobileMenuDrawer";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { GlobalSearch } from "./GlobalSearch";
+import { KeyboardShortcutsTooltip } from "./KeyboardShortcutsTooltip";
+import { useGlobalShortcuts } from "../hooks/useGlobalShortcuts";
+import { Sidebar } from "./Sidebar";
+import logoContinental from "../../assets/Logo continental.png";
 
 export function DashboardLayout() {
-  const availableCount = useAppStore((state) => 
-    state.operations.filter(op => op.status === "disponible").length
-  );
+  const operations = useAppStore((s) => s.operations);
+  const logout = useAppStore((s) => s.logout);
+  const resetOnboarding = useAppStore((s) => s.resetOnboarding);
+  const onboardingCompleted = useAppStore((s) => s.onboardingCompleted);
+  const lastLogin = useAppStore((s) => s.lastLogin);
+  const navigate = useNavigate();
+
+  const availableCount = operations.filter(op => op.status === "disponible").length;
+  const pendingCount = operations.filter(op => op.status === "pendiente").length;
+
+  // Formatear última conexión para el menú de usuario
+  const lastLoginLabel = lastLogin
+    ? new Date(lastLogin).toLocaleString("es-MX", {
+        day: "2-digit",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : undefined;
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
+
+  useGlobalShortcuts();
+
+  // Cerrar menú móvil con Escape
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMobileMenuOpen(false); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileMenuOpen]);
+
+  const handleConfirmLogout = () => {
+    setLogoutConfirmOpen(false);
+    setMobileMenuOpen(false);
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FB]">
-      {/* Header */}
-      <header className="bg-[#00184C] text-white sticky top-0 z-50 shadow-lg">
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-16">
+    <div className="min-h-screen bg-canvas flex">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:bg-white focus:text-azul-oscuro focus:px-3 focus:py-2 focus:rounded focus:shadow"
+      >
+        Saltar al contenido principal
+      </a>
+
+      {/* Sidebar izquierdo (desktop) */}
+      <Sidebar />
+
+      {/* Columna principal */}
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+        {/* Top bar blanco */}
+        <header className="bg-white text-azul-oscuro sticky top-0 z-50 border-b border-border-base">
+          <div className="h-16 px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+            {/* Izquierda: toggle colapsar (desktop) + hamburguesa (móvil) */}
             <div className="flex items-center gap-2">
-              <div className="w-30 h-13  rounded-lg flex items-center justify-center overflow-hidden">
-                <ImageWithFallback 
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Abrir menú"
+                aria-expanded={mobileMenuOpen}
+                className="lg:hidden p-2 rounded-lg hover:bg-canvas transition-colors text-azul-oscuro"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+
+              <div className="lg:hidden flex items-center">
+                <ImageWithFallback
                   src={logoContinental}
-                  alt="Logo Continental"
-                  className="w-full h-full object-contain"
+                  alt="Logo Continental - Gestión de Comisiones"
+                  className="h-8 w-auto object-contain"
                 />
               </div>
-              
             </div>
-            
-            {/* Navigation */}
-              <nav className="flex gap-1">
-              <NavLink
-                to="/resumen"
-                className={({ isActive }) =>
-                  `px-6 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#43D3FF] text-[#00184C] font-semibold'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                Resumen
-              </NavLink>
-              <NavLink
-                to="/cartera"
-                className={({ isActive }) =>
-                  `px-6 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#43D3FF] text-[#00184C] font-semibold'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                Cartera
-              </NavLink>
-              <NavLink
-                to="/facturar"
-                className={({ isActive }) =>
-                  `px-6 py-3 rounded-lg transition-all duration-200 relative ${
-                    isActive
-                      ? 'bg-[#43D3FF] text-[#00184C] font-semibold'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                Facturar
-                {availableCount > 0 && (
-                  <span
-                    title={`${availableCount} operación${availableCount > 1 ? 'es' : ''} lista${availableCount > 1 ? 's' : ''} para facturar`}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-[#F9D35A] text-[#00184C] text-xs font-bold rounded-full flex items-center justify-center animate-pulse cursor-help"
-                  >
-                    {availableCount}
-                  </span>
-                )}
-              </NavLink>
-              <NavLink
-                to="/historial"
-                className={({ isActive }) =>
-                  `px-6 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#43D3FF] text-[#00184C] font-semibold'
-                      : 'text-white/80 hover:text-white hover:bg-white/10'
-                  }`
-                }
-              >
-                Historial
-              </NavLink>
-            </nav>
-          </div>
-        </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-[1400px] mx-auto px-6 py-8">
-        <AgentInfoCard />
-        <div className="mt-6">
-          <Outlet />
-        </div>
-      </main>
+            {/* Derecha: acciones */}
+            <div className="flex items-center gap-0.5 sm:gap-1">
+              <GlobalSearch />
+              <NotificationsBell />
+
+              {!onboardingCompleted && (
+                <button
+                  onClick={resetOnboarding}
+                  aria-label="Ver tour de bienvenida"
+                  title="Ver tour de bienvenida"
+                  className="hidden sm:inline-flex p-2 rounded-lg hover:bg-canvas transition-colors text-azul-oscuro relative"
+                >
+                  <HelpCircle className="w-5 h-5" />
+                  <span
+                    className="absolute top-1 right-1 w-2 h-2 bg-warning rounded-full"
+                    aria-hidden="true"
+                  />
+                </button>
+              )}
+
+              <UserMenu lastLogin={lastLoginLabel} />
+            </div>
+          </div>
+        </header>
+
+        <main id="main-content" className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <AgentInfoCard />
+          <div className="mt-6">
+            <Breadcrumb />
+            <Outlet />
+          </div>
+        </main>
+      </div>
+
+      {/* Menú móvil lateral */}
+      <MobileMenuDrawer
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        onLogout={() => { setMobileMenuOpen(false); setLogoutConfirmOpen(true); }}
+        availableCount={availableCount}
+        pendingCount={pendingCount}
+      />
+
+      {/* Confirmación de logout */}
+      <ConfirmDialog
+        open={logoutConfirmOpen}
+        onClose={() => setLogoutConfirmOpen(false)}
+        intent="warning"
+        title="¿Cerrar sesión?"
+        description="Podrás volver a ingresar cuando quieras. Tu información quedará guardada."
+        cancelLabel="Cancelar"
+        confirmAction={{
+          label: "Sí, cerrar sesión",
+          variant: "danger",
+          onClick: handleConfirmLogout,
+        }}
+      />
+
+      <OnboardingModal />
+      <KeyboardShortcutsTooltip />
     </div>
   );
 }

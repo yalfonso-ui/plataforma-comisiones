@@ -1,66 +1,37 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { ReactNode } from "react";
+import { Info, AlertTriangle, AlertCircle, CheckCircle2, LucideIcon } from "lucide-react";
+import { alertBg, alertIcon, alertText } from "../../utils/ui";
 
-import { cn } from "./utils";
+export type AlertVariant = "success" | "warning" | "danger" | "info";
 
-const alertVariants = cva(
-  "relative w-full rounded-lg border px-4 py-3 text-sm grid has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] grid-cols-[0_1fr] has-[>svg]:gap-x-3 gap-y-0.5 items-start [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
-  {
-    variants: {
-      variant: {
-        default: "bg-card text-card-foreground",
-        destructive:
-          "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-);
-
-function Alert({
-  className,
-  variant,
-  ...props
-}: React.ComponentProps<"div"> & VariantProps<typeof alertVariants>) {
-  return (
-    <div
-      data-slot="alert"
-      role="alert"
-      className={cn(alertVariants({ variant }), className)}
-      {...props}
-    />
-  );
+interface AlertProps {
+  variant: AlertVariant;
+  title?: string;
+  children?: ReactNode;
+  className?: string;
 }
 
-function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
+/**
+ * Componente de Alerta alineado a la Guía de Uso del Sistema de Color:
+ * fondo suave + borde perimetral 1px + ícono representativo.
+ */
+export function Alert({ variant, title, children, className = "" }: AlertProps) {
+  const Icon: LucideIcon = {
+    success: CheckCircle2,
+    warning: AlertTriangle,
+    danger: AlertCircle,
+    info: Info,
+  }[variant];
+
   return (
-    <div
-      data-slot="alert-title"
-      className={cn(
-        "col-start-2 line-clamp-1 min-h-4 font-medium tracking-tight",
-        className,
-      )}
-      {...props}
-    />
+    <div className={`rounded-lg p-4 ${alertBg[variant]} ${className}`} role={variant === "danger" ? "alert" : "status"}>
+      <div className="flex gap-3">
+        <Icon className={`w-5 h-5 flex-shrink-0 mt-0.5 ${alertIcon[variant]}`} />
+        <div className="flex-1">
+          {title && <p className={`text-sm font-medium ${alertText[variant]}`}>{title}</p>}
+          {children && <div className={`text-sm ${alertText[variant]} ${title ? "mt-1" : ""}`}>{children}</div>}
+        </div>
+      </div>
+    </div>
   );
 }
-
-function AlertDescription({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="alert-description"
-      className={cn(
-        "text-muted-foreground col-start-2 grid justify-items-start gap-1 text-sm [&_p]:leading-relaxed",
-        className,
-      )}
-      {...props}
-    />
-  );
-}
-
-export { Alert, AlertTitle, AlertDescription };

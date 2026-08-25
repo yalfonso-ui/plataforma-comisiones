@@ -1,4 +1,13 @@
 import { X, FileText, Calendar, Percent, Building2, DollarSign, Hash, User, CheckCircle2, Clock, Hourglass } from "lucide-react";
+import {
+  BTN_PRIMARY,
+  TEXT_SECONDARY,
+  BORDER_DEFAULT,
+  BG_CANVAS,
+  alertBg,
+  alertText,
+  opStatusClass,
+} from "../utils/ui";
 
 interface Operation {
   id: string;
@@ -22,35 +31,41 @@ interface OperationDetailModalProps {
 export function OperationDetailModal({ operation, onClose, onMarkDisponible }: OperationDetailModalProps) {
   if (!operation) return null;
 
-  const statusConfig = {
-    pendiente: { label: "Pendiente de confirmación", icon: Clock, color: "orange", bg: "bg-orange-100", text: "text-orange-700" },
-    "pendiente-recaudo": { label: "Pendiente de recaudo", icon: Hourglass, color: "yellow", bg: "bg-yellow-100", text: "text-yellow-700" },
-    confirmado: { label: "Pago confirmado", icon: CheckCircle2, color: "blue", bg: "bg-blue-100", text: "text-blue-700" },
-    disponible: { label: "Disponible para facturar", icon: CheckCircle2, color: "green", bg: "bg-green-100", text: "text-green-700" },
+  const statusIcons = {
+    pendiente: Clock,
+    "pendiente-recaudo": Hourglass,
+    confirmado: CheckCircle2,
+    disponible: CheckCircle2,
   };
+  const StatusIcon = statusIcons[operation.status];
 
-  const status = statusConfig[operation.status];
-  const StatusIcon = status.icon;
+  const statusLabels = {
+    pendiente: "Pendiente de confirmación",
+    "pendiente-recaudo": "Pendiente de recaudo",
+    confirmado: "Pago confirmado",
+    disponible: "Disponible para facturar",
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className={`flex items-center justify-between p-6 border-b ${BORDER_DEFAULT}`}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-[#43D3FF]/10 rounded-lg flex items-center justify-center">
-              <FileText className="w-6 h-6 text-[#00184C]" />
+            <div className="w-12 h-12 bg-celeste-soft rounded-lg flex items-center justify-center">
+              <FileText className="w-6 h-6 text-azul-oscuro" />
             </div>
             <div>
-              <h3 className="text-[#00184C] font-semibold">Detalle de Operación</h3>
-              <p className="text-sm text-gray-500">{operation.voucher}</p>
+              <h3 className="text-azul-oscuro font-semibold">Detalle de Operación</h3>
+              <p className={`text-sm ${TEXT_SECONDARY}`}>{operation.voucher}</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-canvas rounded-lg transition-colors"
+            aria-label="Cerrar"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className={`w-5 h-5 ${TEXT_SECONDARY}`} />
           </button>
         </div>
 
@@ -58,15 +73,15 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
         <div className="p-6 space-y-6">
           {/* Status Badge */}
           <div className="flex items-center justify-center">
-            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${status.bg} ${status.text}`}>
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${opStatusClass[operation.status]}`}>
               <StatusIcon className="w-4 h-4" />
-              {status.label}
+              {statusLabels[operation.status]}
             </span>
           </div>
 
           {/* Operation Details */}
-          <div className="bg-gray-50 rounded-xl p-5 space-y-4">
-            <h4 className="text-sm font-semibold text-[#00184C] uppercase tracking-wide">Información de la operación</h4>
+          <div className={`${BG_CANVAS} rounded-xl p-5 space-y-4`}>
+            <h4 className="text-sm font-semibold text-azul-oscuro uppercase tracking-wide">Información de la operación</h4>
 
             <DetailRow icon={<Calendar className="w-4 h-4" />} label="Fecha de emisión" value={operation.fecha} />
             <DetailRow icon={<Building2 className="w-4 h-4" />} label="Plan" value={operation.plan} />
@@ -77,8 +92,8 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
           </div>
 
           {/* Financial Details */}
-          <div className="bg-gray-50 rounded-xl p-5 space-y-4">
-            <h4 className="text-sm font-semibold text-[#00184C] uppercase tracking-wide">Detalles financieros</h4>
+          <div className={`${BG_CANVAS} rounded-xl p-5 space-y-4`}>
+            <h4 className="text-sm font-semibold text-azul-oscuro uppercase tracking-wide">Detalles financieros</h4>
 
             <DetailRow icon={<DollarSign className="w-4 h-4" />} label="Valor por cobrar" value={`$${operation.valor.toLocaleString("es-MX")} MXN`} highlight />
 
@@ -91,14 +106,14 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
             )}
 
             {operation.comision && (
-              <DetailRow icon={<DollarSign className="w-4 h-4" />} label="Comisión" value={`$${operation.comision.toLocaleString("es-MX")} MXN`} highlight highlightColor="text-green-600" />
+              <DetailRow icon={<DollarSign className="w-4 h-4" />} label="Comisión" value={`$${operation.comision.toLocaleString("es-MX")} MXN`} highlight highlightColor="text-success-border" />
             )}
           </div>
 
-          {/* Action for confirmado status */}
+          {/* Alerta Success: confirmação */}
           {operation.status === "confirmado" && onMarkDisponible && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-              <p className="text-sm text-green-800 mb-3">
+            <div className={`${alertBg.success} rounded-xl p-4`}>
+              <p className={`text-sm text-success-border mb-3`}>
                 El pago ha sido confirmado. Si ya se ha procesado el recaudo, puedes marcarlo como disponible para facturar.
               </p>
               <button
@@ -106,7 +121,7 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
                   onMarkDisponible(operation.voucher);
                   onClose();
                 }}
-                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 bg-success text-white rounded-lg hover:bg-success/90 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 Marcar como disponible para facturar
@@ -114,19 +129,19 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
             </div>
           )}
 
-          {/* Pending status message */}
+          {/* Alerta Warning: pendiente */}
           {operation.status === "pendiente" && (
-            <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-              <p className="text-sm text-orange-800">
+            <div className={`${alertBg.warning} rounded-xl p-4`}>
+              <p className={`text-sm ${alertText.warning}`}>
                 Esta operación espera confirmación de pago. Dirígete a la sección de Cartera para confirmar el pago y continuar con el proceso de facturación.
               </p>
             </div>
           )}
 
-          {/* Pendiente-recaudo status message */}
+          {/* Alerta Info: pendiente-recaudo */}
           {operation.status === "pendiente-recaudo" && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-              <p className="text-sm text-yellow-800">
+            <div className={`${alertBg.info} rounded-xl p-4`}>
+              <p className={`text-sm ${alertText.info}`}>
                 El pago está en proceso de recaudo por parte de la empresa. Recibirás una notificación cuando se confirme el cobro.
               </p>
             </div>
@@ -134,10 +149,10 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200">
+        <div className={`p-6 border-t ${BORDER_DEFAULT}`}>
           <button
             onClick={onClose}
-            className="w-full px-6 py-3 bg-[#00184C] text-white rounded-lg hover:bg-[#00184C]/90 transition-colors font-medium"
+            className={`${BTN_PRIMARY} w-full px-6 py-3 rounded-lg font-medium`}
           >
             Cerrar
           </button>
@@ -147,14 +162,20 @@ export function OperationDetailModal({ operation, onClose, onMarkDisponible }: O
   );
 }
 
-function DetailRow({ icon, label, value, highlight, highlightColor }: { icon: React.ReactNode; label: string; value: string; highlight?: boolean; highlightColor?: string }) {
+function DetailRow({ icon, label, value, highlight, highlightColor }: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  highlight?: boolean;
+  highlightColor?: string;
+}) {
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-gray-500">
-        <span className="text-[#43D3FF]">{icon}</span>
+      <div className={`flex items-center gap-2 ${TEXT_SECONDARY}`}>
+        <span className="text-celeste">{icon}</span>
         <span className="text-sm">{label}</span>
       </div>
-      <span className={`text-sm font-medium ${highlight ? "text-xl font-bold " + (highlightColor || "text-[#00184C]") : "text-[#00184C]"}`}>
+      <span className={`text-sm font-medium ${highlight ? `text-xl font-bold ${highlightColor ?? "text-azul-oscuro"}` : "text-azul-oscuro"}`}>
         {value}
       </span>
     </div>

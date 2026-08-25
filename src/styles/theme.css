@@ -3,49 +3,107 @@
 :root {
   --font-size: 16px;
   --font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  
-  /* Fintech custom colors */
-  --color-primary-dark: #00184C;
-  --color-secondary-cyan: #43D3FF;
-  --color-cta-yellow: #F9D35A;
-  
+
+  /* ============================================
+     FAMILY 1: AZUL OSCURO (Corporativo - Dominante)
+     ============================================ */
+  --color-azul-oscuro: #00184C;
+  --color-azul-oscuro-soft: #EEF2F7;
+  --color-azul-oscuro-hover: #001033;
+
+  /* ============================================
+     FAMILY 2: CELESTE (Corporativo - Acento)
+     ============================================ */
+  --color-celeste: #43D3FF;
+  --color-celeste-soft: #E8F9FF;
+  --color-celeste-subtle: #B5EDFF;
+
+  /* ============================================
+     FAMILY 3: AMARILLO (Corporativo - CTA)
+     ============================================ */
+  --color-amarillo: #F9D35A;
+  --color-amarillo-soft: #FFFBEB;
+  --color-amarillo-hover: #E2BB3F;
+
+  /* ============================================
+     FAMILY 4: SEMÁNTICO - SUCCESS
+     ============================================ */
+  --color-success: #10B981;
+  --color-success-soft: #ECFDF5;
+  --color-success-border: #047857;
+
+  /* ============================================
+     FAMILY 5: SEMÁNTICO - DANGER / ERROR
+     ============================================ */
+  --color-danger: #EF4444;
+  --color-danger-soft: #FEF2F2;
+  --color-danger-border: #B91C1C;
+
+  /* ============================================
+     FAMILY 6: SEMÁNTICO - WARNING (naranja, NO amarillo)
+     ============================================ */
+  --color-warning: #F97316;
+  --color-warning-soft: #FFF7ED;
+  --color-warning-border: #C2410C;
+
+  /* ============================================
+     FAMILY 7: SEMÁNTICO - INFO
+     ============================================ */
+  --color-info: #0284C7;
+  --color-info-soft: #F0F9FF;
+  --color-info-border: #0369A1;
+
+  /* ============================================
+     NEUTROS DE ESTRUCTURA
+     ============================================ */
+  --color-canvas: #F8FAFC;
+  --color-border-base: #E2E8F0;
+  --color-text-secondary: #64748B;
+
+  /* ============================================
+     COMPATIBILIDAD (legacy tokens)
+     ============================================ */
+  --color-primary-dark: var(--color-azul-oscuro);
+  --color-secondary-cyan: var(--color-celeste);
+  --color-cta-yellow: var(--color-amarillo);
+
   --background: #ffffff;
-  --foreground: #00184C;
+  --foreground: var(--color-azul-oscuro);
   --card: #ffffff;
-  --card-foreground: #00184C;
+  --card-foreground: var(--color-azul-oscuro);
   --popover: #ffffff;
-  --popover-foreground: #00184C;
-  --primary: #030213;
-  --primary-foreground: #00184C;
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
-  --destructive: #d4183d;
-  --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
+  --popover-foreground: var(--color-azul-oscuro);
+  --primary: var(--color-azul-oscuro);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-celeste-soft);
+  --secondary-foreground: var(--color-azul-oscuro);
+  --muted: var(--color-border-base);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-celeste-soft);
+  --accent-foreground: var(--color-azul-oscuro);
+  --destructive: var(--color-danger);
+  --destructive-foreground: var(--color-danger-border);
+  --border: var(--color-border-base);
   --input: transparent;
   --input-background: #f3f3f5;
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: var(--color-celeste);
+  --chart-1: var(--color-azul-oscuro);
+  --chart-2: var(--color-celeste);
+  --chart-3: var(--color-warning);
+  --chart-4: var(--color-success);
+  --chart-5: var(--color-info);
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
+  --sidebar-primary: var(--color-azul-oscuro);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent: var(--color-azul-oscuro-soft);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-border: var(--color-border-base);
+  --sidebar-ring: var(--color-celeste);
 }
 
 .dark {
@@ -86,6 +144,37 @@
 }
 
 @theme inline {
+  /* Corporate tokens */
+  --color-azul-oscuro: var(--color-azul-oscuro);
+  --color-azul-oscuro-soft: var(--color-azul-oscuro-soft);
+  --color-azul-oscuro-hover: var(--color-azul-oscuro-hover);
+  --color-celeste: var(--color-celeste);
+  --color-celeste-soft: var(--color-celeste-soft);
+  --color-celeste-subtle: var(--color-celeste-subtle);
+  --color-amarillo: var(--color-amarillo);
+  --color-amarillo-soft: var(--color-amarillo-soft);
+  --color-amarillo-hover: var(--color-amarillo-hover);
+
+  /* Semantic tokens */
+  --color-success: var(--color-success);
+  --color-success-soft: var(--color-success-soft);
+  --color-success-border: var(--color-success-border);
+  --color-danger: var(--color-danger);
+  --color-danger-soft: var(--color-danger-soft);
+  --color-danger-border: var(--color-danger-border);
+  --color-warning: var(--color-warning);
+  --color-warning-soft: var(--color-warning-soft);
+  --color-warning-border: var(--color-warning-border);
+  --color-info: var(--color-info);
+  --color-info-soft: var(--color-info-soft);
+  --color-info-border: var(--color-info-border);
+
+  /* Neutral tokens */
+  --color-canvas: var(--color-canvas);
+  --color-border-base: var(--color-border-base);
+  --color-text-secondary: var(--color-text-secondary);
+
+  /* shadcn-style tokens (compatibilidad) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -135,55 +224,16 @@
     @apply bg-background text-foreground;
   }
 
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
   html {
     font-size: var(--font-size);
     font-family: var(--font-family);
   }
 
-  h1 {
-    font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h2 {
-    font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h3 {
-    font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  button {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  input {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-normal);
-    line-height: 1.5;
-  }
+  h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; }
+  input { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; }
 }
