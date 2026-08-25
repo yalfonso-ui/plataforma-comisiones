@@ -68,7 +68,7 @@ export function Login() {
       </div>
 
       {/* Panel derecho - formulario */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-white">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-canvas">
         <div className="w-full max-w-md space-y-8">
           <div className="lg:hidden flex justify-center">
             <img src={logoContinental} alt="Continental" className="h-12" />

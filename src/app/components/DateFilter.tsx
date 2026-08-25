@@ -150,7 +150,7 @@ export function DateFilter() {
                         }}
                         modifiersClassNames={{
                           selected: '!bg-celeste !text-azul-oscuro font-bold',
-                          today: 'border-2 border-amarillo',
+                          today: 'border-2 border-celeste',
                           range_middle: '!bg-celeste-soft',
                         }}
                         className="text-sm scale-95"

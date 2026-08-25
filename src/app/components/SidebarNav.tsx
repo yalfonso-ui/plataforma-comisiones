@@ -97,10 +97,10 @@ export function SidebarNav({
                   {/* Badge compacto cuando está colapsado */}
                   {collapsed && item.badge !== undefined && (
                     <span
-                      className={`absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center ${
+                      className={`absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center border ${
                         item.badgeVariant === "warning"
-                          ? "bg-warning text-azul-oscuro"
-                          : "bg-info text-white"
+                          ? "bg-warning-soft text-warning-border border-warning-border/30"
+                          : "bg-info-soft text-info-border border-info-border/30"
                       }`}
                       aria-label={`${item.badge} pendiente${item.badge > 1 ? "s" : ""}`}
                     >

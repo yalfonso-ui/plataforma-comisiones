@@ -67,7 +67,7 @@
   --color-secondary-cyan: var(--color-celeste);
   --color-cta-yellow: var(--color-amarillo);
 
-  --background: #ffffff;
+  --background: var(--color-canvas);
   --foreground: var(--color-azul-oscuro);
   --card: #ffffff;
   --card-foreground: var(--color-azul-oscuro);
