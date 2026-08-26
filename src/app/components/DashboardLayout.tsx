@@ -99,20 +99,23 @@ export function DashboardLayout() {
               <GlobalSearch />
               <NotificationsBell />
 
-              {!onboardingCompleted && (
-                <button
-                  onClick={resetOnboarding}
-                  aria-label="Ver tour de bienvenida"
-                  title="Ver tour de bienvenida"
-                  className="hidden sm:inline-flex p-2 rounded-lg hover:bg-canvas transition-colors text-azul-oscuro relative"
-                >
-                  <HelpCircle className="w-5 h-5" />
+              {/* Botón de tour siempre visible — con badge si no se ha completado */}
+              <button
+                onClick={resetOnboarding}
+                aria-label={onboardingCompleted ? "Ver tutorial de nuevo" : "Ver tour de bienvenida"}
+                title={onboardingCompleted ? "Ver tutorial de nuevo" : "Tour de bienvenida disponible"}
+                className="hidden sm:inline-flex p-2 rounded-lg hover:bg-canvas transition-colors text-azul-oscuro relative"
+              >
+                <HelpCircle className="w-5 h-5" />
+                {!onboardingCompleted && (
                   <span
-                    className="absolute top-1 right-1 w-2 h-2 bg-warning rounded-full"
-                    aria-hidden="true"
-                  />
-                </button>
-              )}
+                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-celeste text-azul-oscuro text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-white"
+                    title="Tour disponible"
+                  >
+                    1
+                  </span>
+                )}
+              </button>
 
               <UserMenu lastLogin={lastLoginLabel} />
             </div>

@@ -18,6 +18,17 @@ export const SIDEBAR_NAV_ITEMS: SidebarNavItem[] = [
   { to: "/historial", label: "Historial", icon: CheckCircle2, shortcut: "G H" },
 ];
 
+/** Tooltip descriptivo según la ruta y el conteo. */
+function badgeTooltip(to: string, count: number): string {
+  if (to === "/cartera") {
+    return `${count} comisión${count > 1 ? "es" : ""} pendiente${count > 1 ? "s" : ""} de confirmar`;
+  }
+  if (to === "/facturar") {
+    return `${count} comisión${count > 1 ? "es" : ""} disponible${count > 1 ? "s" : ""} para facturar`;
+  }
+  return `${count} pendiente${count > 1 ? "s" : ""}`;
+}
+
 interface SidebarNavProps {
   availableCount: number;
   pendingCount: number;
@@ -82,9 +93,37 @@ export function SidebarNav({
                   <item.icon className="w-5 h-5 flex-shrink-0" />
                   {!collapsed && <span className="flex-1 text-sm">{item.label}</span>}
 
+                  {/* Badge expandido — desktop + drawer móvil */}
                   {!collapsed && item.badge !== undefined && (
                     <span
-                      className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                      title={badgeTooltip(item.to, item.badge)}
+                      aria-label={badgeTooltip(item.to, item.badge)}
+                      className={`relative text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                        item.badgeVariant === "warning"
+                          ? "bg-warning-soft text-warning-border border border-warning-border/30"
+                          : "bg-info-soft text-info-border border border-info-border/30"
+                      }`}
+                    >
+                      {item.badge > 99 ? "99+" : item.badge}
+                      {/* Pulso sutil para atraer atención — solo desktop */}
+                      {!compact && (
+                        <span
+                          aria-hidden="true"
+                          className={`absolute inset-0 rounded-full animate-ping opacity-30 ${
+                            item.badgeVariant === "warning" ? "bg-warning" : "bg-info"
+                          }`}
+                          style={{ animationDuration: "2.5s" }}
+                        />
+                      )}
+                    </span>
+                  )}
+
+                  {/* Badge compacto — sidebar colapsado */}
+                  {collapsed && item.badge !== undefined && (
+                    <span
+                      title={badgeTooltip(item.to, item.badge)}
+                      aria-label={badgeTooltip(item.to, item.badge)}
+                      className={`absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center border ${
                         item.badgeVariant === "warning"
                           ? "bg-warning-soft text-warning-border border border-warning-border/30"
                           : "bg-info-soft text-info-border border border-info-border/30"
@@ -94,24 +133,16 @@ export function SidebarNav({
                     </span>
                   )}
 
-                  {/* Badge compacto cuando está colapsado */}
-                  {collapsed && item.badge !== undefined && (
-                    <span
-                      className={`absolute top-1 right-1 min-w-[16px] h-4 px-1 text-[10px] font-bold rounded-full flex items-center justify-center border ${
-                        item.badgeVariant === "warning"
-                          ? "bg-warning-soft text-warning-border border-warning-border/30"
-                          : "bg-info-soft text-info-border border-info-border/30"
-                      }`}
-                      aria-label={`${item.badge} pendiente${item.badge > 1 ? "s" : ""}`}
+                  {!collapsed && !compact && (
+                    <kbd
+                      title={`Atajo: ${item.shortcut}`}
+                      className="hidden group-hover:inline-flex text-[10px] text-text-secondary/60 font-mono border border-border-base rounded px-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      {item.badge > 9 ? "9+" : item.badge}
-                    </span>
-                  )}
-
-                  {!collapsed && (
-                    <kbd className="hidden text-[10px] text-text-secondary/60 font-mono border border-border-base rounded px-1.5">
                       {item.shortcut}
                     </kbd>
+                  )}
+                  {!compact && collapsed && (
+                    <kbd className="sr-only">{item.shortcut}</kbd>
                   )}
 
                   {isActive && <span className="sr-only">(página actual)</span>}

@@ -73,11 +73,27 @@ export function Facturar() {
 
   const handleSubmit = () => {
     if (selectedOperations.size === 0) {
-      toast.error("Selecciona al menos una operación");
+      toast.error("Selecciona al menos una operación", {
+        description: "Marca los vouchers que quieres incluir en esta factura antes de continuar.",
+      });
       return;
     }
-    if (!xmlFile || !pdfFile) {
-      toast.error("Debes subir ambos archivos (XML y PDF)");
+    if (!xmlFile && !pdfFile) {
+      toast.error("Faltan ambos archivos", {
+        description: "Debes subir el archivo XML y el archivo PDF para enviar la factura.",
+      });
+      return;
+    }
+    if (!xmlFile) {
+      toast.error("Falta el archivo XML", {
+        description: "Sube el comprobante fiscal digital (CFDI) en formato XML.",
+      });
+      return;
+    }
+    if (!pdfFile) {
+      toast.error("Falta el archivo PDF", {
+        description: "Sube la representación impresa del CFDI en formato PDF.",
+      });
       return;
     }
 
