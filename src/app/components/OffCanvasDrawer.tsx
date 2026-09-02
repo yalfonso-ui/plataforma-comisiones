@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ComponentType } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { BORDER_DEFAULT } from "../utils/ui";
 
 /** Ítem de segundo nivel en un submenú. */
 export interface OffCanvasNavChild {
@@ -26,8 +27,12 @@ interface OffCanvasDrawerProps {
   onClose: () => void;
   /** Título de la cabecera (ej. "Tus titulaciones"). Si se omite, no se muestra. */
   title?: string;
-  /** Lista de secciones de nivel 1. */
-  sections: OffCanvasNavSection[];
+  /** Lista de secciones de nivel 1. Si se omite y se pasan `children`, se ignora. */
+  sections?: OffCanvasNavSection[];
+  /** Slot opcional para inyectar contenido personalizado en el cuerpo del drawer. */
+  children?: React.ReactNode;
+  /** Slot opcional para el footer (debajo del nav). */
+  footer?: React.ReactNode;
   /** Etiqueta ARIA del diálogo. Por defecto: "Menú de navegación". */
   ariaLabel?: string;
 }
@@ -49,6 +54,8 @@ export function OffCanvasDrawer({
   onClose,
   title,
   sections,
+  children,
+  footer,
   ariaLabel = "Menú de navegación",
 }: OffCanvasDrawerProps) {
   const asideRef = useRef<HTMLElement>(null);
@@ -150,91 +157,102 @@ export function OffCanvasDrawer({
           )}
         </div>
 
-        {/* Navegación de nivel 1 con submenús acordeón */}
-        <nav className="flex-1 overflow-y-auto py-2" aria-label="Navegación principal">
-          <ul className="space-y-0.5 px-2">
-            {sections.map((section) => {
-              const hasChildren = Array.isArray(section.children) && section.children.length > 0;
-              const isExpanded = expanded.has(section.id);
-              const Icon = section.icon;
+        {/* Contenido: prioriza children inyectado; si no, pinta sections acordeón */}
+        {children ? (
+          <div className="flex-1 overflow-y-auto">{children}</div>
+        ) : (
+          <nav className="flex-1 overflow-y-auto py-2" aria-label="Navegación principal">
+            <ul className="space-y-0.5 px-2">
+              {(sections ?? []).map((section) => {
+                const hasChildren = Array.isArray(section.children) && section.children.length > 0;
+                const isExpanded = expanded.has(section.id);
+                const Icon = section.icon;
 
-              // Sección sin hijos → enlace directo.
-              if (!hasChildren) {
-                const Tag: keyof JSX.IntrinsicElements = section.href ? "a" : "button";
-                const itemProps = section.href
-                  ? { href: section.href }
-                  : { type: "button" as const };
+                // Sección sin hijos → enlace directo.
+                if (!hasChildren) {
+                  const Tag: keyof JSX.IntrinsicElements = section.href ? "a" : "button";
+                  const itemProps = section.href
+                    ? { href: section.href }
+                    : { type: "button" as const };
+                  return (
+                    <li key={section.id}>
+                      <Tag
+                        {...itemProps}
+                        onClick={() => {
+                          section.onClick?.();
+                          onClose();
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-azul-oscuro hover:bg-canvas transition-colors text-sm text-left"
+                      >
+                        {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
+                        <span className="flex-1">{section.label}</span>
+                      </Tag>
+                    </li>
+                  );
+                }
+
+                // Sección con hijos → acordeón.
                 return (
                   <li key={section.id}>
-                    <Tag
-                      {...itemProps}
-                      onClick={() => {
-                        section.onClick?.();
-                        onClose();
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-azul-oscuro hover:bg-canvas transition-colors text-sm text-left"
+                    <button
+                      type="button"
+                      onClick={() => toggleExpanded(section.id)}
+                      aria-expanded={isExpanded}
+                      aria-controls={`section-${section.id}`}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-azul-oscuro hover:bg-canvas transition-colors text-sm"
                     >
                       {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-                      <span className="flex-1">{section.label}</span>
-                    </Tag>
+                      <span className="flex-1 text-left">{section.label}</span>
+                      <ChevronRight
+                        className={`w-4 h-4 text-text-secondary transition-transform duration-200 ${
+                          isExpanded ? "rotate-90" : ""
+                        }`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {/* Submenú desplegable con sangría */}
+                    <div
+                      id={`section-${section.id}`}
+                      role="region"
+                      aria-label={`Submenú ${section.label}`}
+                      className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
+                        isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <ul className="pl-4 pr-2 pb-1 space-y-0.5">
+                          {section.children!.map((child) => (
+                            <li key={child.id}>
+                              <a
+                                href={child.href ?? "#"}
+                                onClick={(e) => {
+                                  if (!child.href) e.preventDefault();
+                                  child.onClick?.();
+                                  onClose();
+                                }}
+                                className="block px-3 py-2 rounded-lg text-text-secondary hover:bg-canvas hover:text-azul-oscuro transition-colors text-sm"
+                              >
+                                {child.label}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </li>
                 );
-              }
+              })}
+            </ul>
+          </nav>
+        )}
 
-              // Sección con hijos → acordeón.
-              return (
-                <li key={section.id}>
-                  <button
-                    type="button"
-                    onClick={() => toggleExpanded(section.id)}
-                    aria-expanded={isExpanded}
-                    aria-controls={`section-${section.id}`}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-azul-oscuro hover:bg-canvas transition-colors text-sm"
-                  >
-                    {Icon && <Icon className="w-5 h-5 flex-shrink-0" />}
-                    <span className="flex-1 text-left">{section.label}</span>
-                    <ChevronRight
-                      className={`w-4 h-4 text-text-secondary transition-transform duration-200 ${
-                        isExpanded ? "rotate-90" : ""
-                      }`}
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  {/* Submenú desplegable con sangría */}
-                  <div
-                    id={`section-${section.id}`}
-                    role="region"
-                    aria-label={`Submenú ${section.label}`}
-                    className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
-                      isExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                    }`}
-                  >
-                    <div className="overflow-hidden">
-                      <ul className="pl-4 pr-2 pb-1 space-y-0.5">
-                        {section.children!.map((child) => (
-                          <li key={child.id}>
-                            <a
-                              href={child.href ?? "#"}
-                              onClick={(e) => {
-                                if (!child.href) e.preventDefault();
-                                child.onClick?.();
-                                onClose();
-                              }}
-                              className="block px-3 py-2 rounded-lg text-text-secondary hover:bg-canvas hover:text-azul-oscuro transition-colors text-sm"
-                            >
-                              {child.label}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        {/* Footer opcional (no se monta si no se pasa) */}
+        {footer && (
+          <div className={`border-t ${BORDER_DEFAULT} p-3 space-y-1 bg-white`}>
+            {footer}
+          </div>
+        )}
       </aside>
     </>
   );

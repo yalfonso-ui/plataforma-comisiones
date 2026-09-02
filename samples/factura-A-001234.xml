@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+  xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd"
+  Version="4.0" Serie="A" Folio="A-001234"
+  Fecha="2026-09-02T10:30:00"
+  SubTotal="14800.00" Descuento="0.00" Moneda="MXN" Total="17168.00" TipoDeComprobante="I" Exportacion="01"
+  MetodoPago="PUE" LugarExpedicion="11000">
+
+  <cfdi:Emisor Rfc="CON080828RA2" Nombre="CONTINENTAL SEGUROS SA" RegimenFiscal="601"/>
+
+  <cfdi:Receptor Rfc="VYT950815AB3" Nombre="VIAJES Y TURISMO SA" DomicilioFiscalReceptor="11000" RegimenFiscalReceptor="603" UsoCFDI="G03"/>
+
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84121500" Cantidad="1" ClaveUnidad="E48" Unidad="Servicio"
+      Descripcion="Comisiones por intermediacion aseguradora - Plan Premium - VCH-2026-004"
+      ValorUnitario="14800.00" Importe="14800.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="14800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="2368.00"/>
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="14800.00" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.040000" Importe="592.00"/>
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+
+  <cfdi:Impuestos TotalImpuestosRetenidos="592.00" TotalImpuestosTrasladados="2368.00">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto="001" Importe="592.00"/>
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="14800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="2368.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="F8A7B6C5-1234-4DEF-9ABC-0123456789AB"
+      FechaTimbrado="2026-09-02T10:35:12"
+      SelloCFD="DEMO_SELLO_CFD_CONTINENTAL_A001234_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+      NoCertificadoSAT="00001000000512345678"
+      SelloSAT="DEMO_SELLO_SAT_CONTINENTAL_A001234_yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+      RfcProvCertif="SAT970701NN3"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

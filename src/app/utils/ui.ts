@@ -8,7 +8,8 @@
  * para asegurar el contraste de legibilidad.
  */
 
-import type { Operation, Invoice } from "../store/appStore";
+import type { Operation } from "../store/appStore";
+import type { InvoiceStatus } from "../types/domain";
 
 // ====================================================
 // BADGES - Estados de la comisión
@@ -38,13 +39,30 @@ export const opStatusClass: Record<Operation["status"], string> = {
 };
 
 // ====================================================
-// BADGES - Estados de la factura
+// BADGES - Estados de la factura (nuevos estados)
 // ====================================================
 
-export const invoiceStatusClass: Record<Invoice["status"], string> = {
-  procesando: PENDIENTE_RECAUDO_CLASS, // proceso en curso = info/neutro
-  aprobada: DISPONIBLE_CLASS,           // éxito
-  rechazada: "bg-danger-soft text-danger-border border-danger-border/30", // danger
+export const invoiceStatusClass: Record<InvoiceStatus, string> = {
+  en_cartera: PENDIENTE_RECAUDO_CLASS,           // pendiente de revisión
+  aprobada_cartera: "bg-celeste-soft text-celeste border-celeste-subtle", // aprobada por cartera
+  en_comisiones: "bg-warning-soft text-warning-border border-warning-border/30", // pendiente comisiones
+  aprobada_comisiones: DISPONIBLE_CLASS,          // lista para dispersar
+  dispersada: "bg-success-soft text-success-border border-success-border/30", // pagada
+  rechazada: "bg-danger-soft text-danger-border border-danger-border/30",
+  rechazada_cartera: "bg-danger-soft text-danger-border border-danger-border/30",
+  rechazada_comisiones: "bg-danger-soft text-danger-border border-danger-border/30",
+};
+
+// Labels legibles para cada estado de factura
+export const invoiceStatusLabel: Record<InvoiceStatus, string> = {
+  en_cartera: "En Cartera",
+  aprobada_cartera: "Aprobada por Cartera",
+  en_comisiones: "En Comisiones",
+  aprobada_comisiones: "Aprobada por Comisiones",
+  dispersada: "Dispersada",
+  rechazada: "Rechazada",
+  rechazada_cartera: "Rechazada por Cartera",
+  rechazada_comisiones: "Rechazada por Comisiones",
 };
 
 // ====================================================

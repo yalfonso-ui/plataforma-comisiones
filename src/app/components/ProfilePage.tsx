@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
-import { ArrowLeft, Mail, Building2, Hash, CreditCard, User, IdCard } from "lucide-react";
+import { ArrowLeft, Mail, Building2, Hash, CreditCard, User, IdCard, Shield } from "lucide-react";
 import { useAppStore } from "../store/appStore";
 import { BTN_PRIMARY, BTN_SECONDARY, BORDER_DEFAULT, BG_CANVAS, TEXT_SECONDARY } from "../utils/ui";
+import { ROLE_META } from "../auth/permissions";
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -48,7 +49,7 @@ export function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoRow icon={<User className="w-4 h-4" />} label="Nombre completo" value={user?.name ?? "—"} />
           <InfoRow icon={<Mail className="w-4 h-4" />} label="Correo" value={user?.email ?? "—"} />
-          <InfoRow icon={<IdCard className="w-4 h-4" />} label="Rol" value={user?.rol === "admin" ? "Administrador" : user?.rol === "supervisor" ? "Supervisor" : "Comercial"} />
+          <InfoRow icon={<Shield className="w-4 h-4" />} label="Rol" value={user?.rol ? ROLE_META[user.rol]?.label ?? user.rol : "Comercial"} />
           <InfoRow icon={<Hash className="w-4 h-4" />} label="ID Agente" value={`${user?.initials ?? "AC"}-2026`} />
         </div>
       </div>

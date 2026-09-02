@@ -3,6 +3,8 @@ import { LogOut, User, HelpCircle, Keyboard, ChevronUp, BookOpen, Clock } from "
 import { useAppStore } from "../store/appStore";
 import { useNavigate } from "react-router";
 import { TEXT_SECONDARY, BORDER_DEFAULT, BG_CANVAS } from "../utils/ui";
+import { RoleSwitcher } from "./RoleSwitcher";
+import { ROLE_META } from "../auth/permissions";
 
 interface UserMenuProps {
   lastLogin?: string;
@@ -41,6 +43,8 @@ export function UserMenu({ lastLogin }: UserMenuProps) {
     logout();
   };
 
+  const roleLabel = user?.rol ? ROLE_META[user.rol]?.label ?? user.rol : "Comercial";
+
   return (
     <div ref={containerRef} className="relative">
       <button
@@ -68,10 +72,13 @@ export function UserMenu({ lastLogin }: UserMenuProps) {
         <div
           role="menu"
           aria-label="Menú de usuario"
-          className={`absolute right-0 top-full mt-2 w-72 bg-white text-azul-oscuro rounded-xl shadow-2xl ${BORDER_DEFAULT} border z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200`}
+          className={`absolute right-0 top-full mt-2 w-80 bg-white text-azul-oscuro rounded-xl shadow-2xl ${BORDER_DEFAULT} border z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200`}
         >
-          {/* Cabecera del usuario */}
-          <div className={`px-4 py-3 border-b ${BORDER_DEFAULT} bg-gradient-to-br from-azul-oscuro-soft to-white`}>
+          {/* Cabecera del usuario — SESIÓN ACTIVA */}
+          <div className={`px-4 py-3 border-b ${BORDER_DEFAULT}`}>
+            <p className="text-[10px] text-text-secondary font-semibold uppercase tracking-wider mb-2">
+              Sesión Activa
+            </p>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-celeste text-azul-oscuro rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">
                 {user?.initials ?? "AC"}
@@ -82,9 +89,12 @@ export function UserMenu({ lastLogin }: UserMenuProps) {
               </div>
             </div>
             <p className="text-[10px] text-celeste mt-2 font-semibold uppercase tracking-wide inline-block px-2 py-0.5 bg-celeste-soft rounded">
-              {user?.nivel ?? "Nivel 1 - Comercial"}
+              {roleLabel}
             </p>
           </div>
+
+          {/* Role Switcher — SIMULAR ROL */}
+          <RoleSwitcher />
 
           {/* Acciones principales */}
           <div className="py-1">
@@ -110,11 +120,6 @@ export function UserMenu({ lastLogin }: UserMenuProps) {
               label="Atajos de teclado"
               onClick={() => {
                 setOpen(false);
-                setTimeout(() => {
-                  const btn = document.querySelector<HTMLButtonElement>('[aria-label="Ver atajos de teclado"]');
-                  btn?.focus();
-                  btn?.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
-                }, 0);
               }}
             />
           </div>

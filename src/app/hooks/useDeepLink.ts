@@ -6,7 +6,7 @@ export type StatusFilter = "all" | "pendiente" | "pendiente-recaudo" | "confirma
 
 /**
  * Convierte un set de vouchers (seleccionados en Resumen) a un query string.
- * Útil para deep-linking desde KPIs a Cartera con un filtro aplicado.
+ * Útil para deep-linking desde KPIs a Cartera (/cartera) con un filtro aplicado.
  */
 export function useDeepLink() {
   const [, setSearchParams] = useSearchParams();

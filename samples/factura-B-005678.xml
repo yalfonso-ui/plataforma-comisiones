@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"
+  xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd"
+  Version="4.0" Serie="B" Folio="B-005678"
+  Fecha="2026-09-02T14:15:00"
+  SubTotal="8800.00" Descuento="0.00" Moneda="MXN" Total="10208.00" TipoDeComprobante="I" Exportacion="01"
+  MetodoPago="PUE" LugarExpedicion="11000">
+
+  <cfdi:Emisor Rfc="CON080828RA2" Nombre="CONTINENTAL SEGUROS SA" RegimenFiscal="601"/>
+
+  <cfdi:Receptor Rfc="GARM850312AB1" Nombre="MARIA GARCIA LOPEZ" DomicilioFiscalReceptor="11000" RegimenFiscalReceptor="605" UsoCFDI="G03"/>
+
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="84121500" Cantidad="1" ClaveUnidad="E48" Unidad="Servicio"
+      Descripcion="Comisiones por intermediacion aseguradora - Plan Basico - VCH-2026-005"
+      ValorUnitario="8800.00" Importe="8800.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="8800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1408.00"/>
+        </cfdi:Traslados>
+        <cfdi:Retenciones>
+          <cfdi:Retencion Base="8800.00" Impuesto="001" TipoFactor="Tasa" TasaOCuota="0.100000" Importe="880.00"/>
+        </cfdi:Retenciones>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+
+  <cfdi:Impuestos TotalImpuestosRetenidos="880.00" TotalImpuestosTrasladados="1408.00">
+    <cfdi:Retenciones>
+      <cfdi:Retencion Impuesto="001" Importe="880.00"/>
+    </cfdi:Retenciones>
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="8800.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="1408.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital Version="1.1" UUID="A1B2C3D4-9876-4FED-8CBA-9988776655AA"
+      FechaTimbrado="2026-09-02T14:20:45"
+      SelloCFD="DEMO_SELLO_CFD_CONTINENTAL_B005678_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz"
+      NoCertificadoSAT="00001000000512345678"
+      SelloSAT="DEMO_SELLO_SAT_CONTINENTAL_B005678_wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"
+      RfcProvCertif="SAT970701NN3"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

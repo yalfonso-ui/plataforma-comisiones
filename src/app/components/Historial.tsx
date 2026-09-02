@@ -15,13 +15,15 @@ import {
   alertBg,
   alertText,
   invoiceStatusClass,
+  invoiceStatusLabel,
 } from "../utils/ui";
+import type { InvoiceStatus } from "../types/domain";
 
 export function Historial() {
   const invoices = useAppStore((state) => state.invoices);
   const updateInvoiceStatus = useAppStore((state) => state.updateInvoiceStatus);
   const resetData = useAppStore((state) => state.resetData);
-  const [filter, setFilter] = useState<"all" | "procesando" | "aprobada" | "rechazada">("all");
+  const [filter, setFilter] = useState<InvoiceStatus | "all">("all");
   const { period, customStartDate, customEndDate } = useDateFilterStore();
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
@@ -82,28 +84,29 @@ export function Historial() {
 
   const handleApproveDemo = () => {
     if (!selectedInvoice) return;
-    updateInvoiceStatus(selectedInvoice.id, "aprobada");
-    setSelectedInvoice({ ...selectedInvoice, status: "aprobada" });
+    const nextStatus: InvoiceStatus = selectedInvoice.status === "en_cartera" ? "aprobada_cartera" : "aprobada_comisiones";
+    updateInvoiceStatus(selectedInvoice.id, nextStatus);
+    setSelectedInvoice({ ...selectedInvoice, status: nextStatus });
   };
   const handleRejectDemo = () => {
     if (!selectedInvoice) return;
     const motivo = prompt("Motivo del rechazo:", "Datos fiscales incorrectos");
     if (motivo === null) return;
-    updateInvoiceStatus(selectedInvoice.id, "rechazada", motivo);
-    setSelectedInvoice({ ...selectedInvoice, status: "rechazada", rechazadaMotivo: motivo });
+    const nextStatus: InvoiceStatus = selectedInvoice.status === "en_cartera" ? "rechazada_cartera" : "rechazada_comisiones";
+    updateInvoiceStatus(selectedInvoice.id, nextStatus, motivo);
+    setSelectedInvoice({ ...selectedInvoice, status: nextStatus, rechazadaMotivo: motivo });
   };
 
   const totales = useMemo(() => ({
     total: filteredInvoices.reduce((sum, inv) => sum + inv.totalComision, 0),
-    aprobadas: filteredInvoices.filter((inv) => inv.status === "aprobada").length,
-    procesando: filteredInvoices.filter((inv) => inv.status === "procesando").length,
+    aprobadas: filteredInvoices.filter((inv) => inv.status.includes("aprobada")).length,
+    pendientes: filteredInvoices.filter((inv) => inv.status.includes("en_")).length,
   }), [filteredInvoices]);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="text-azul-oscuro mb-2">Historial de Facturas</h2>
         <p className={`text-sm ${TEXT_SECONDARY}`}>Consulta y descarga todas tus facturas enviadas</p>
       </div>
 
@@ -117,9 +120,14 @@ export function Historial() {
             className={`px-4 py-2 bg-white border ${BORDER_DEFAULT} rounded-lg focus:outline-none focus:ring-2 focus:ring-celeste focus:border-celeste hover:border-celeste transition-colors text-sm font-medium text-azul-oscuro`}
           >
             <option value="all">Todos los estados</option>
-            <option value="procesando">En proceso</option>
-            <option value="aprobada">Aprobadas</option>
-            <option value="rechazada">Rechazadas</option>
+            <option value="en_cartera">En Cartera</option>
+            <option value="aprobada_cartera">Aprobada por Cartera</option>
+            <option value="en_comisiones">En Comisiones</option>
+            <option value="aprobada_comisiones">Aprobada por Comisiones</option>
+            <option value="dispersada">Dispersada</option>
+            <option value="rechazada_cartera">Rechazada por Cartera</option>
+            <option value="rechazada_comisiones">Rechazada por Comisiones</option>
+            <option value="rechazada">Rechazada</option>
           </select>
           {hasFilters && (
             <button onClick={clearFilters} className={`text-xs text-azul-oscuro hover:text-celeste underline`}>
@@ -134,7 +142,7 @@ export function Historial() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard label="Total Facturado" value={`$${totales.total.toLocaleString("es-MX")} MXN`} icon={<FileText className="w-5 h-5" />} color="bg-azul-oscuro text-white" />
         <StatCard label="Facturas Aprobadas" value={totales.aprobadas} icon={<CheckCircle2 className="w-5 h-5" />} color="bg-success-soft text-success border border-success-border/30" />
-        <StatCard label="En Proceso" value={totales.procesando} icon={<Clock className="w-5 h-5" />} color="bg-warning-soft text-warning border border-warning-border/30" />
+        <StatCard label="En Proceso" value={totales.pendientes} icon={<Clock className="w-5 h-5" />} color="bg-warning-soft text-warning border border-warning-border/30" />
       </div>
 
       {/* Table */}
@@ -227,12 +235,12 @@ export function Historial() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-1">
-                        {/* Ver detalle — celeste: lectura / vista previa */}
+                        {/* Ver factura — celeste: lectura / vista previa */}
                         <button
                           onClick={() => setSelectedInvoice(invoice)}
-                          aria-label={`Ver detalle de ${invoice.id}`}
+                          aria-label={`Ver factura ${invoice.id}`}
                           className="group p-2 rounded-lg transition-all duration-150 hover:bg-celeste-soft hover:scale-105 active:scale-95"
-                          title="Ver detalle"
+                          title="Ver factura"
                         >
                           <Eye className="w-4 h-4 text-text-secondary group-hover:text-azul-oscuro transition-colors" />
                         </button>
@@ -304,17 +312,18 @@ function StatCard({ label, value, icon, color }: { label: string; value: string 
   );
 }
 
-function StatusBadge({ status }: { status: Invoice["status"] }) {
-  const config = {
-    procesando: { label: "En proceso", icon: Clock },
-    aprobada: { label: "Aprobada", icon: CheckCircle2 },
-    rechazada: { label: "Rechazada", icon: XCircle },
-  };
-  const { label, icon: Icon } = config[status];
+function StatusBadge({ status }: { status: InvoiceStatus }) {
+  const isRechazada = status.includes("rechazada");
+  const isAprobada = status.includes("aprobada");
+  const isPendiente = status.includes("en_");
+  const isDispersada = status === "dispersada";
+
+  const Icon = isRechazada ? XCircle : isAprobada ? CheckCircle2 : isDispersada ? CheckCircle2 : Clock;
+
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${invoiceStatusClass[status]}`}>
       <Icon className="w-3 h-3" />
-      {label}
+      {invoiceStatusLabel[status]}
     </span>
   );
 }
@@ -330,14 +339,14 @@ function InvoiceDetailModal({ invoice, onClose, onDownload, onApproveDemo, onRej
   if (!invoice) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-label="Detalle de factura">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true" aria-label="Vista previa de factura">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className={`flex items-center justify-between p-6 border-b border-border-base`}>
           <div>
             <h3 className="text-azul-oscuro font-semibold text-lg">{invoice.id}</h3>
             <p className={`text-sm ${TEXT_SECONDARY}`}>Enviada el {invoice.fecha}</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-canvas rounded-lg" aria-label="Cerrar">
+          <button onClick={onClose} className="p-2 hover:bg-canvas rounded-lg" aria-label="Cerrar vista de factura">
             <X className={`w-5 h-5 ${TEXT_SECONDARY}`} />
           </button>
         </div>
@@ -397,7 +406,7 @@ function InvoiceDetailModal({ invoice, onClose, onDownload, onApproveDemo, onRej
           </div>
 
           {/* Demo controls: alerta warning + acciones */}
-          {invoice.status === "procesando" && (
+          {invoice.status.includes("en_") && (
             <div className={`${alertBg.warning} rounded-xl p-4`}>
               <p className={`text-xs font-semibold ${alertText.warning} uppercase tracking-wide mb-2`}>Demo: simular respuesta</p>
               <div className="flex gap-2">

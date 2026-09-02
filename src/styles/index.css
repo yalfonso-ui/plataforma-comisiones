@@ -3,6 +3,111 @@
 @import './theme.css';
 @import './calendar.css';
 
+/* ============================================================
+   Scrollbar fino — usado por el panel lateral de facturación
+   y por listas densas. Estilo discreto alineado a design system.
+   ============================================================ */
+@layer utilities {
+  /* Webkit (Chrome, Edge, Safari) */
+  aside.sticky::-webkit-scrollbar,
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  aside.sticky::-webkit-scrollbar-track,
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  aside.sticky::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: #B5EDFF;
+    border-radius: 3px;
+  }
+  aside.sticky::-webkit-scrollbar-thumb:hover,
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: #43D3FF;
+  }
+}
+
+/* ============================================================
+   Accesibilidad global
+   ============================================================ */
+
+/* Focus visible consistente para todos los botones de la app.
+   Aplica un anillo de 2px en color azul oscuro con offset. */
+button:not(:disabled):focus-visible,
+a:focus-visible {
+  outline: none;
+  ring: 2px;
+  box-shadow: 0 0 0 2px var(--color-azul-oscuro), 0 0 0 4px white;
+  border-radius: 6px;
+}
+
+/* Inputs y selects — mantener el focus celeste existente */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+/* ============================================================
+   Scroll highlight — animación de atención para guiar al usuario
+   cuando el sistema necesita que enfoque un campo específico.
+   Se aplica con .scroll-highlight al elemento destino.
+   ============================================================ */
+@keyframes scroll-highlight-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(67, 211, 255, 0);
+  }
+  20% {
+    box-shadow: 0 0 0 4px rgba(67, 211, 255, 0.5);
+  }
+  60% {
+    box-shadow: 0 0 0 8px rgba(67, 211, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(67, 211, 255, 0);
+  }
+}
+
+.scroll-highlight {
+  animation: scroll-highlight-pulse 2.4s ease-out 1;
+  border-radius: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Respetar prefers-reduced-motion — desactiva todas las animaciones
+   y transiciones para usuarios que lo solicitan (vestibular disorders,
+   migrañas, etc.). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip-to-content link para usuarios de teclado/lector de pantalla */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--color-azul-oscuro);
+  color: white;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 8px;
+}
+
 /* Print styles */
 @media print {
   header, .print\:hidden, [role="dialog"], #main-content > div:first-child button {

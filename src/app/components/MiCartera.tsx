@@ -1,7 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { Search, Filter, ArrowUpDown, ArrowUp, ArrowDown, CheckCircle2, Clock, Hourglass, Eye, Info, ChevronDown, X } from "lucide-react";
+import { Search, Filter, ArrowUpDown, ArrowUp, ArrowDown, CheckCircle2, Clock, Hourglass, Receipt, Info, ChevronDown, X } from "lucide-react";
 import { ConfirmPaymentModal } from "./ConfirmPaymentModal";
-import { OperationDetailModal } from "./OperationDetailModal";
 import { useAppStore, Operation } from "../store/appStore";
 import { toast } from "sonner";
 import { useNavigate, useSearchParams } from "react-router";
@@ -28,7 +27,7 @@ type SortConfig = { key: SortKey; direction: "asc" | "desc" } | null;
 
 const VALID_STATUSES: Status[] = ["pendiente", "pendiente-recaudo", "confirmado", "disponible"];
 
-export function Cartera() {
+export function MiCartera() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const operations = useAppStore((state) => state.operations);
@@ -49,32 +48,17 @@ export function Cartera() {
   const [selectedVouchers, setSelectedVouchers] = useState<Set<string>>(new Set());
   const [selectedOperation, setSelectedOperation] = useState<Operation | null>(null);
   const [showModal, setShowModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showStatusGuide, setShowStatusGuide] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Si llegan query params con un voucher, abrir el detalle automáticamente
+  // Limpiar query params al montar (el deep-link ?voucher= ya no abre detalle)
   useEffect(() => {
-    const v = searchParams.get("voucher");
-    if (v) {
-      const op = operations.find(o => o.voucher === v);
-      if (op) {
-        setSelectedOperation(op);
-        setShowDetailModal(true);
-      }
+    if (searchParams.get("voucher") || searchParams.get("status")) {
+      setSearchParams({}, { replace: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Limpiar query params al cerrar el detalle
-  const closeDetail = () => {
-    setShowDetailModal(false);
-    setSelectedOperation(null);
-    if (searchParams.get("voucher")) {
-      setSearchParams({}, { replace: true });
-    }
-  };
 
   // Sincronizar filtros a query params cuando cambian
   useEffect(() => {
@@ -87,7 +71,7 @@ export function Cartera() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "/" && !showModal && !showDetailModal) {
+      if (e.key === "/" && !showModal) {
         e.preventDefault();
         searchInputRef.current?.focus();
       }
@@ -95,8 +79,6 @@ export function Cartera() {
         if (showModal) {
           setShowModal(false);
           setSelectedOperation(null);
-        } else if (showDetailModal) {
-          closeDetail();
         } else if (searchTerm) {
           setSearchTerm("");
           searchInputRef.current?.blur();
@@ -107,7 +89,7 @@ export function Cartera() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showModal, showDetailModal, searchTerm]);
+  }, [showModal, searchTerm]);
 
   const dateRange = useMemo(() => {
     return getDateRange(period, customStartDate, customEndDate);
@@ -187,9 +169,9 @@ export function Cartera() {
     });
   };
 
-  const handleViewDetail = (operation: Operation) => {
-    setSelectedOperation(operation);
-    setShowDetailModal(true);
+  const handleFacturar = (operation: Operation) => {
+    // Acceso directo al wizard con la operación preseleccionada
+    navigate(`/facturar?voucher=${operation.voucher}`);
   };
 
   const pendingVouchers = filteredOperations.filter(op => op.status === "pendiente");
@@ -219,7 +201,6 @@ export function Cartera() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-azul-oscuro mb-2">Cartera de Comisiones</h2>
           <p className={`text-sm ${TEXT_SECONDARY}`}>Gestiona y confirma tus comisiones pendientes</p>
         </div>
 
@@ -526,14 +507,16 @@ export function Cartera() {
                           Confirmar pago
                         </button>
                       )}
-                      <button
-                        onClick={() => handleViewDetail(operation)}
-                        aria-label={`Ver detalle de ${operation.voucher}`}
-                        className="group px-3 py-2 border border-border-base rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-150 hover:border-celeste hover:bg-celeste-soft hover:scale-[1.02] active:scale-[0.98]"
-                      >
-                        <Eye className="w-4 h-4 text-text-secondary group-hover:text-azul-oscuro transition-colors" />
-                        <span className="text-text-secondary group-hover:text-azul-oscuro transition-colors">Ver detalle</span>
-                      </button>
+                      {operation.status === "disponible" && (
+                        <button
+                          onClick={() => handleFacturar(operation)}
+                          aria-label={`Facturar ${operation.voucher}`}
+                          className={`${BTN_CTA} px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2`}
+                        >
+                          <Receipt className="w-4 h-4" />
+                          Facturar
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -566,16 +549,6 @@ export function Cartera() {
           }}
           onConfirm={handleConfirmPayment}
           isLoading={isLoading}
-        />
-      )}
-
-      {showDetailModal && selectedOperation && (
-        <OperationDetailModal
-          operation={selectedOperation}
-          onClose={() => {
-            closeDetail();
-          }}
-          onMarkDisponible={handleMarkDisponible}
         />
       )}
     </div>

@@ -76,7 +76,6 @@ export function Resumen() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-azul-oscuro mb-2">Resumen General</h2>
           <p className={`text-sm ${TEXT_SECONDARY}`}>
             Vista general de tus comisiones y actividad
             <span className="inline-flex items-center gap-1 ml-2 text-[11px] opacity-70">
@@ -293,7 +292,7 @@ function KPICard({ title, value, subtitle, icon, color, textColor, badge, badgeC
         <p className={`text-xs ${textColor} opacity-75`}>{subtitle}</p>
         {interactive && (
           <span className={`inline-flex items-center gap-1 mt-3 text-xs font-medium ${textColor} opacity-90 group-hover:opacity-100 transition-opacity`}>
-            Ver detalle
+            Ver más
             <ArrowUpRight className="w-3 h-3" />
           </span>
         )}

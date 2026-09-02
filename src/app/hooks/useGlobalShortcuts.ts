@@ -6,7 +6,7 @@ import { useNavigate } from "react-router";
  *
  * Navegación:
  *   g r → /resumen
- *   g c → /cartera
+ *   g c / g k / g v → /cartera (comercial: vouchers / rol Cartera: aprobaciones)
  *   g f → /facturar
  *   g h → /historial
  *   g p → /perfil
@@ -40,7 +40,7 @@ export function useGlobalShortcuts() {
         // No prevenir si está en input — deja que el usuario lo maneje
         return;
       }
-      // Permitir "?" también — manejado por KeyboardShortcutsTooltip
+      // Permitir "?" también — atajo no usado por ahora
       if (e.key === "?") {
         return;
       }
@@ -66,7 +66,12 @@ export function useGlobalShortcuts() {
             e.preventDefault();
             navigate("/resumen");
             break;
-          case "c":
+          case "v":
+            // Alias de "c" — algunos usuarios lo buscan como "vouchers"
+            e.preventDefault();
+            navigate("/cartera");
+            break;
+          case "k":
             e.preventDefault();
             navigate("/cartera");
             break;

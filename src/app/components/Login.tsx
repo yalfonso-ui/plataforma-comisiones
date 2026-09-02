@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
-import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, Shield } from "lucide-react";
 import logoContinental from "../../assets/Logo continental.png";
 import { useAppStore } from "../store/appStore";
+import { MOCK_USERS } from "../auth/mockUsers";
+import { ROLE_META, type AppRole } from "../auth/permissions";
 import { toast } from "sonner";
 
 export function Login() {
@@ -21,19 +23,18 @@ export function Login() {
     setIsLoading(false);
     if (ok) {
       toast.success("Sesión iniciada correctamente");
-      // Si veníamos de una ruta protegida, volvemos allí
       const from = (location.state as { from?: string } | null)?.from;
       navigate(from && from !== "/login" ? from : "/resumen", { replace: true });
     } else {
       toast.error("Credenciales inválidas", {
-        description: "Verifica tu correo y que la contraseña tenga al menos 4 caracteres.",
+        description: "Verifica tu correo y contraseña. Revisa los usuarios demo disponibles.",
       });
     }
   };
 
-  const fillDemo = () => {
-    setEmail("maria.garcia@continental.com");
-    setPassword("demo1234");
+  const quickLogin = (mockEmail: string) => {
+    setEmail(mockEmail);
+    setPassword("demo");
   };
 
   return (
@@ -59,7 +60,7 @@ export function Login() {
           <div className="grid grid-cols-3 gap-4 pt-6 max-w-md">
             <Stat number="24h" label="Procesamiento" />
             <Stat number="100%" label="Trazabilidad" />
-            <Stat number="4" label="Estados claros" />
+            <Stat number="4" label="Roles claros" />
           </div>
         </div>
         <div className="relative z-10 text-sm text-white/50">
@@ -112,7 +113,6 @@ export function Login() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  minLength={4}
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -128,16 +128,6 @@ export function Login() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" className="w-4 h-4 accent-azul-oscuro" />
-                <span className="text-text-secondary">Recordarme</span>
-              </label>
-              <a href="#" className="text-azul-oscuro hover:text-celeste font-medium">
-                ¿Olvidaste tu contraseña?
-              </a>
             </div>
 
             <button
@@ -159,15 +149,37 @@ export function Login() {
             </button>
           </form>
 
-          <div className="text-center pt-4 border-t border-border-base">
-            <button
-              type="button"
-              onClick={fillDemo}
-              className="text-xs text-azul-oscuro hover:text-celeste inline-flex items-center gap-1"
-            >
-              Probar con datos demo
-              <ArrowRight className="w-3 h-3" />
-            </button>
+          {/* Quick login por rol */}
+          <div className="pt-4 border-t border-border-base">
+            <div className="flex items-center gap-2 mb-3">
+              <Shield className="w-4 h-4 text-celeste" />
+              <span className="text-xs font-semibold text-azul-oscuro uppercase tracking-wider">
+                Acceso rápido por rol
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {MOCK_USERS.map((mock) => {
+                const meta = ROLE_META[mock.rol];
+                return (
+                  <button
+                    key={mock.email}
+                    type="button"
+                    onClick={() => quickLogin(mock.email)}
+                    className={`text-left px-3 py-2.5 rounded-lg border border-border-base hover:border-celeste hover:bg-celeste-soft transition-all text-sm group`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 bg-celeste-soft text-azul-oscuro rounded-full flex items-center justify-center text-[10px] font-bold group-hover:bg-celeste">
+                        {mock.initials}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-azul-oscuro text-xs truncate">{meta.label}</p>
+                        <p className="text-[10px] text-text-secondary truncate">{mock.name.split(" ")[0]}</p>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

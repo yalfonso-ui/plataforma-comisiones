@@ -29,9 +29,9 @@ export function Breadcrumb() {
     crumbs.push({ label, to: acc });
   }
 
-  // Solo mostrar si hay profundidad (sub-ruta) o si la URL tiene query params
+  // Solo mostrar si hay profundidad (sub-ruta).
   // En el home raíz no se muestra.
-  const hasDepth = crumbs.length > 2 || location.search.length > 0;
+  const hasDepth = crumbs.length > 2;
   if (!hasDepth) return null;
 
   const canGoBack = location.key !== "default";
@@ -76,11 +76,6 @@ export function Breadcrumb() {
               </li>
             );
           })}
-          {location.search && (
-            <span className={`text-[10px] ${TEXT_SECONDARY} opacity-70 ml-2`}>
-              {location.search}
-            </span>
-          )}
         </ol>
       </div>
     </nav>

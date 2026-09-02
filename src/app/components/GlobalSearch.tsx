@@ -145,7 +145,7 @@ export function GlobalSearch() {
 
       const quick: Result[] = [
         { id: "act-resumen", label: "Ir a Resumen", sub: "Página principal", type: "usuario", href: "/resumen", groupLabel: "Acciones rápidas" },
-        { id: "act-cartera", label: "Ir a Cartera", sub: "Comisiones del periodo", type: "usuario", href: "/cartera", groupLabel: "Acciones rápidas" },
+        { id: "act-cartera", label: "Ir a Cartera", sub: "Tus comisiones o aprobaciones según tu rol", type: "usuario", href: "/cartera", groupLabel: "Acciones rápidas" },
         { id: "act-facturar", label: "Ir a Facturar", sub: "Crear factura", type: "usuario", href: "/facturar", groupLabel: "Acciones rápidas" },
         { id: "act-historial", label: "Ir a Historial", sub: "Facturas enviadas", type: "usuario", href: "/historial", groupLabel: "Acciones rápidas" },
         { id: "act-perfil", label: "Mi perfil", sub: "Datos personales y bancarios", type: "usuario", href: "/perfil", groupLabel: "Acciones rápidas" },
@@ -239,13 +239,13 @@ export function GlobalSearch() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className={`hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-base bg-white text-azul-oscuro hover:bg-canvas transition-colors text-xs`}
+        className={`hidden md:flex w-full items-center gap-2 px-3 py-2 rounded-lg border border-border-base bg-canvas text-azul-oscuro hover:bg-white hover:border-celeste transition-colors text-sm cursor-text`}
         aria-label="Abrir búsqueda global (Cmd K)"
-        title="Búsqueda global"
+        title="Búsqueda global (⌘K)"
       >
-        <Search className="w-3.5 h-3.5" />
-        <span>Buscar...</span>
-        <kbd className="bg-canvas text-text-secondary px-1.5 py-0.5 rounded text-[10px] font-mono border border-border-base">
+        <Search className="w-4 h-4 text-text-secondary flex-shrink-0" />
+        <span className="text-text-secondary flex-1 text-left">Buscar voucher, factura, sección…</span>
+        <kbd className="bg-white text-text-secondary px-1.5 py-0.5 rounded text-[10px] font-mono border border-border-base flex-shrink-0">
           ⌘K
         </kbd>
       </button>
