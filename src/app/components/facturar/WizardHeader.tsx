@@ -1,5 +1,8 @@
 // ============================================================
 // Stepper visual del wizard 1 → 2 → 3 → 4
+// Responsivo:
+//  - ≥ sm: 4 columnas con label + descripción debajo del número.
+//  - < sm: barra compacta "Paso X de 4: [Label]" + línea de dots.
 // ============================================================
 
 import { Check } from "lucide-react";
@@ -29,10 +32,43 @@ export function WizardHeader({
   onStepClick,
 }: WizardHeaderProps) {
   const reachability = [canGoToStep1, canGoToStep2, canGoToStep3, canGoToStep4];
+  const activeStep = STEPS[currentStep - 1];
 
   return (
     <nav aria-label="Pasos del wizard" className="bg-white rounded-xl shadow-sm border border-border-base p-4">
-      <ol className="flex items-center justify-between gap-2">
+      {/* Versión mobile (< sm): label + dots compactos */}
+      <div className="sm:hidden flex items-center justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] uppercase tracking-wider font-semibold text-text-secondary">
+            Paso {currentStep} de 4
+          </p>
+          <p className="text-sm font-semibold text-azul-oscuro truncate">
+            {activeStep.label}
+          </p>
+        </div>
+        {/* Línea de dots minimalistas */}
+        <ol className="flex items-center gap-1.5" aria-hidden="true">
+          {STEPS.map((step) => {
+            const isComplete = step.num < currentStep;
+            const isActive = step.num === currentStep;
+            return (
+              <li
+                key={step.num}
+                className={`h-1.5 rounded-full transition-all ${
+                  isActive
+                    ? "w-6 bg-azul-oscuro"
+                    : isComplete
+                      ? "w-1.5 bg-success"
+                      : "w-1.5 bg-border-base"
+                }`}
+              />
+            );
+          })}
+        </ol>
+      </div>
+
+      {/* Versión desktop (≥ sm): stepper completo */}
+      <ol className="hidden sm:flex items-center justify-between gap-2">
         {STEPS.map((step, idx) => {
           const isActive = step.num === currentStep;
           const isComplete = step.num < currentStep;
@@ -58,19 +94,20 @@ export function WizardHeader({
                 type="button"
                 disabled={!isReachable && !isComplete}
                 onClick={() => onStepClick?.(step.num as 1 | 2 | 3 | 4)}
+                aria-current={isActive ? "step" : undefined}
+                aria-label={`Paso ${step.num}: ${step.label}. ${step.description}`}
                 className={`flex items-center gap-3 w-full text-left transition-all ${
                   isReachable || isComplete ? "cursor-pointer hover:opacity-80" : "cursor-not-allowed"
                 }`}
               >
                 <div
                   className={`w-9 h-9 rounded-full border-2 flex items-center justify-center font-semibold text-sm transition-colors flex-shrink-0 ${dotClass}`}
-                  aria-current={isActive ? "step" : undefined}
                 >
                   {isComplete ? <Check className="w-4 h-4" /> : step.num}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`text-xs ${labelClass} truncate`}>{step.label}</p>
-                  <p className="text-[10px] text-text-secondary truncate hidden sm:block">
+                  <p className="text-[10px] text-text-secondary truncate">
                     {step.description}
                   </p>
                 </div>

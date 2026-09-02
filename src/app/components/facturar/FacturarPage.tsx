@@ -180,20 +180,22 @@ export function FacturarPage() {
     // pb-32 = 128px. Espacio inferior para que el footer fijo no tape
     // el último registro de la tabla cuando el usuario hace scroll al final.
     <div className="space-y-4 pb-32">
-      {/* Stepper */}
-      <WizardHeader
-        currentStep={wizard.step}
-        canGoToStep1={true}
-        canGoToStep2={wizard.canAdvanceFromStep1}
-        canGoToStep3={wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2}
-        canGoToStep4={wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2 && wizard.canAdvanceFromStep3}
+      {/* Stepper — sticky en móvil para mantener el contexto siempre visible */}
+      <div className="sticky top-16 z-20 -mx-4 px-4 sm:mx-0 sm:px-0 sm:static bg-canvas sm:bg-transparent py-1">
+        <WizardHeader
+          currentStep={wizard.step}
+          canGoToStep1={true}
+          canGoToStep2={wizard.canAdvanceFromStep1}
+          canGoToStep3={wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2}
+          canGoToStep4={wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2 && wizard.canAdvanceFromStep3}
         onStepClick={(s) => {
           if (s === 1) wizard.goTo(1);
           else if (s === 2 && wizard.canAdvanceFromStep1) wizard.goTo(2);
           else if (s === 3 && wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2) wizard.goTo(3);
           else if (s === 4 && wizard.canAdvanceFromStep1 && wizard.canAdvanceFromStep2 && wizard.canAdvanceFromStep3) wizard.goTo(4);
         }}
-      />
+        />
+      </div>
 
       {/* =================================================================
          GRID PRINCIPAL CON SCROLL GLOBAL DE PÁGINA

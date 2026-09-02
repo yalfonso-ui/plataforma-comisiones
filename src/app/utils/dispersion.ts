@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { Invoice } from "../store/appStore";
+import type { AuthUser } from "../store/appStore";
 
 /**
  * Genera un archivo plano (.txt) para dispersión de pagos.
@@ -14,48 +15,51 @@ import type { Invoice } from "../store/appStore";
  *   Footer:   F|TotalRegistros|TotalMonto
  *
  * Cada línea termina con \r\n (estándar Windows / mainframe).
+ *
+ * Los datos bancarios se leen del usuario activo (perfil). Si el
+ * perfil no los tiene definidos, se omite el archivo plano con
+ * un error explícito para evitar dispersiones incompletas.
  */
-export function generarArchivoDispersion(invoices: Invoice[]): string {
+export function generarArchivoDispersion(invoices: Invoice[], user: AuthUser): string {
+  if (!user.clabe || !user.banco || !user.tipoIdentificacion || !user.numeroIdentificacion) {
+    throw new Error(
+      `El usuario activo (${user.name}) no tiene datos bancarios completos. ` +
+      "No se puede generar el archivo de dispersión."
+    );
+  }
+
   const fecha = new Date().toISOString().split("T")[0].replace(/-/g, "");
   const lineas: string[] = [];
 
-  // Datos bancarios demo del comercial (en producción saldrían del perfil)
-  const bancosDemo = [
-    { banco: "BBVA", clabe: "012180001234567890", tipoId: "CC", numId: "79123456" },
-    { banco: "Bancolombia", clabe: "023001234567890123", tipoId: "CC", numId: "52987654" },
-    { banco: "Davivienda", clabe: "051001234567890123", tipoId: "NIT", numId: "900123456" },
-  ];
-
   const totalMonto = invoices.reduce((s, inv) => s + inv.totalComision, 0);
 
-  // Header
+  // Header — incluye el nombre del usuario que dispersa como proveedor.
   lineas.push(
     [
       "H",
       fecha,
-      "DISPERSION_COMISIONES_CONTINENTAL",
+      `DISPERSION_${user.initials}_CONTINENTAL`,
       invoices.length.toString().padStart(6, "0"),
       totalMonto.toFixed(2),
     ].join("|")
   );
 
-  // Body — una línea por factura
-  invoices.forEach((inv, idx) => {
-    const banco = bancosDemo[idx % bancosDemo.length];
-    const titular = inv.razonSocial ?? "COMERCIAL_CONTINENTAL";
+  // Body — una línea por factura usando los datos del usuario activo.
+  invoices.forEach((inv) => {
+    const titular = user.name;
     const referencia = `INV-${inv.id.replace("INV-", "")}`;
 
     lineas.push(
       [
         "D",
-        banco.clabe.substring(0, 10),           // numero de cuenta
-        banco.clabe,                            // CLABE interbancaria
-        banco.tipoId,                           // tipo identificación
-        banco.numId,                            // número identificación
-        banco.banco,                            // banco
-        titular.replace(/[^A-Z0-9 ]/gi, "").toUpperCase(),  // titular (sin caracteres especiales)
-        inv.totalComision.toFixed(2),           // monto
-        referencia,                             // referencia
+        user.cuenta ?? user.clabe.substring(0, 10),  // numero de cuenta
+        user.clabe,                                   // CLABE interbancaria
+        user.tipoIdentificacion,                      // tipo identificación
+        user.numeroIdentificacion,                    // número identificación
+        user.banco,                                   // banco
+        titular.replace(/[^A-Z0-9 ]/gi, "").toUpperCase(), // titular (sin caracteres especiales)
+        inv.totalComision.toFixed(2),                  // monto
+        referencia,                                    // referencia
       ].join("|")
     );
   });

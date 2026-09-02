@@ -61,6 +61,14 @@ export interface AuthUser {
   initials: string;
   rol: AppRole;
   nivel: string;
+  /** Datos bancarios del usuario para el archivo de dispersión. */
+  banco?: string;
+  clabe?: string;
+  cuenta?: string;
+  /** Tipo de identificación (CC, NIT, RFC, etc.). */
+  tipoIdentificacion?: string;
+  /** Número de identificación fiscal. */
+  numeroIdentificacion?: string;
 }
 
 export interface Notification {
@@ -111,7 +119,9 @@ const DEMO_INVOICES: Invoice[] = [
     vouchers: ["VCH-2026-017", "VCH-2026-018"],
     totalComision: 74500, totalLiquidado: 67050,
     xmlFileName: "factura-001.xml", pdfFileName: "factura-001.pdf",
-    status: "aprobada_cartera", agenciaId: "age-2",
+    // agenciaId debe ser el del primer voucher para mantener coherencia
+    // con la regla aplicada en buildInvoice() al crear nuevas facturas.
+    status: "aprobada_cartera", agenciaId: "age-2", // VCH-2026-017 → age-2 ✓
     rfc: "GARM850312AB1", razonSocial: "María García López",
     folioFiscal: "F9B17E2A-3C4D-4E5F-89A0-1B2C3D4E5F6G",
   },
@@ -120,7 +130,7 @@ const DEMO_INVOICES: Invoice[] = [
     vouchers: ["VCH-2026-019", "VCH-2026-020", "VCH-2026-021"],
     totalComision: 76400, totalLiquidado: 68760,
     xmlFileName: "factura-002.xml", pdfFileName: "factura-002.pdf",
-    status: "aprobada_cartera", agenciaId: "age-1",
+    status: "aprobada_cartera", agenciaId: "age-1", // VCH-2026-019 → age-1 ✓
     rfc: "GARM850312AB1", razonSocial: "María García López",
     folioFiscal: "A2C83F19-7B6E-4D2C-A1B3-9F8E7D6C5B4A",
   },
@@ -129,7 +139,7 @@ const DEMO_INVOICES: Invoice[] = [
     vouchers: ["VCH-2026-022", "VCH-2026-023"],
     totalComision: 35700, totalLiquidado: 32130,
     xmlFileName: "factura-003.xml", pdfFileName: "factura-003.pdf",
-    status: "en_cartera", agenciaId: "age-3",
+    status: "en_cartera", agenciaId: "age-1", // VCH-2026-022 → age-1 ✓ (antes decía age-3)
     rfc: "GARM850312AB1", razonSocial: "María García López",
     folioFiscal: "3D4E5F6G-7H8I-9J0K-1L2M-3N4O5P6Q7R8S",
   },
@@ -138,7 +148,7 @@ const DEMO_INVOICES: Invoice[] = [
     vouchers: ["VCH-2026-024", "VCH-2026-025"],
     totalComision: 74200, totalLiquidado: 66780,
     xmlFileName: "factura-004.xml", pdfFileName: "factura-004.pdf",
-    status: "rechazada", agenciaId: "age-2",
+    status: "rechazada", agenciaId: "age-3", // VCH-2026-024 → age-3 ✓ (antes decía age-2)
     rfc: "GARM850312AB1", razonSocial: "María García López",
     folioFiscal: "8S7R6Q5P-4O3N-2M1L-0K9J-8I7H6G5F4E3D",
     rechazadaMotivo: "Los archivos XML y PDF no corresponden al mismo comprobante.",
@@ -151,6 +161,22 @@ const DEMO_USER: AuthUser = {
   initials: "MG",
   rol: "comercial",
   nivel: "Comercial Senior",
+  banco: "BBVA",
+  clabe: "012180001234567890",
+  cuenta: "1234567890",
+  tipoIdentificacion: "CC",
+  numeroIdentificacion: "79123456",
+};
+
+/** Configuración fiscal inicial — fuente de verdad para resetData(). */
+const DEFAULT_CONFIG: AppState["config"] = {
+  tasaRetefuenteJuridica: 0.04,
+  tasaRetefuenteNatural: 0.10,
+  tasaReteICA: 0,
+  aplicarISRPorDefecto: false,
+  ivaColombia: 0.19,
+  razonSocialEmisor: "Continental Seguros SA",
+  nitEmisor: "860.002.134-1",
 };
 
 // ============================================================
@@ -211,41 +237,22 @@ interface AppState {
 
 const uid = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get) => ({
-      operations: DEMO_OPERATIONS,
-      invoices: DEMO_INVOICES,
-      agencias: DEMO_AGENCIAS,
-      config: {
-        tasaRetefuenteJuridica: 0.04,
-        tasaRetefuenteNatural: 0.10,
-        tasaReteICA: 0,
-        aplicarISRPorDefecto: false,
-        ivaColombia: 0.19,
-        razonSocialEmisor: "Continental Seguros SA",
-        nitEmisor: "860.002.134-1",
-      },
-      availableOperationsCount: DEMO_OPERATIONS.filter(op => op.status === "disponible").length,
-      user: DEMO_USER,
-      isAuthenticated: false,
-      onboardingCompleted: false,
-      lastLogin: null,
-      notifications: [
-        {
-          id: uid(),
-          tipo: "info",
-          titulo: "Bienvenido a Continental Comisiones",
-          mensaje: "Hemos rediseñado la plataforma para ti. Descubre las nuevas funciones disponibles.",
-          fecha: new Date().toISOString(),
-          leida: false,
-        },
+/**
+ * Genera el set inicial de notificaciones según el rol.
+ * Cada rol arranca con sus alertas contextuales (un comercial no ve
+ * "tienes facturas pendientes de aprobar" y viceversa).
+ */
+function seedNotifications(role: AppRole): Notification[] {
+  const now = new Date().toISOString();
+  switch (role) {
+    case "comercial":
+      return [
         {
           id: uid(),
           tipo: "success",
           titulo: "Vouchers disponibles para facturar",
           mensaje: "Tienes operaciones listas. Ve a la sección Facturar para emitir tu factura del periodo.",
-          fecha: new Date().toISOString(),
+          fecha: now,
           leida: false,
           href: "/facturar",
         },
@@ -254,11 +261,72 @@ export const useAppStore = create<AppState>()(
           tipo: "warning",
           titulo: "Pagos pendientes de confirmación",
           mensaje: "Todavía tienes vouchers que requieren que confirmes el pago con tu comprobante bancario.",
-          fecha: new Date().toISOString(),
+          fecha: now,
+          leida: false,
+          href: "/mi-cartera",
+        },
+      ];
+    case "cartera":
+      return [
+        {
+          id: uid(),
+          tipo: "info",
+          titulo: "Facturas pendientes de revisión",
+          mensaje: "Tienes facturas radicadas esperando tu aprobación. Revisa el módulo de Cartera.",
+          fecha: now,
           leida: false,
           href: "/cartera",
         },
-      ],
+        {
+          id: uid(),
+          tipo: "warning",
+          titulo: "Rechazo con motivo pendiente",
+          mensaje: "Una factura fue rechazada. Verifica el motivo antes de reenviar.",
+          fecha: now,
+          leida: false,
+          href: "/historial",
+        },
+      ];
+    case "comisiones":
+      return [
+        {
+          id: uid(),
+          tipo: "info",
+          titulo: "Facturas listas para dispersión",
+          mensaje: "Ya puedes revisar las facturas aprobadas por Cartera y programar la dispersión.",
+          fecha: now,
+          leida: false,
+          href: "/comisiones",
+        },
+      ];
+    case "super_admin":
+      return [
+        {
+          id: uid(),
+          tipo: "info",
+          titulo: "Panel de administración",
+          mensaje: "Gestiona agencias, usuarios y la configuración global del sistema desde aquí.",
+          fecha: now,
+          leida: false,
+          href: "/agencias",
+        },
+      ];
+  }
+}
+
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      operations: DEMO_OPERATIONS,
+      invoices: DEMO_INVOICES,
+      agencias: DEMO_AGENCIAS,
+      config: DEFAULT_CONFIG,
+      availableOperationsCount: DEMO_OPERATIONS.filter(op => op.status === "disponible").length,
+      user: DEMO_USER,
+      isAuthenticated: false,
+      onboardingCompleted: false,
+      lastLogin: null,
+      notifications: seedNotifications("comercial"),
 
       // ============================================================
       // AUTH
@@ -283,6 +351,11 @@ export const useAppStore = create<AppState>()(
             initials: mockUser.initials,
             rol: mockUser.rol,
             nivel: mockUser.nivel,
+            banco: mockUser.banco,
+            clabe: mockUser.clabe,
+            cuenta: mockUser.cuenta,
+            tipoIdentificacion: mockUser.tipoIdentificacion,
+            numeroIdentificacion: mockUser.numeroIdentificacion,
           },
           lastLogin: now,
         });
@@ -296,21 +369,37 @@ export const useAppStore = create<AppState>()(
       switchRole: (role) => {
         const currentUser = get().user;
         if (!currentUser) return;
+        // No-op si ya está en el rol activo (evita re-renders innecesarios).
+        if (currentUser.rol === role) return;
 
-        // Actualizar usuario con el nuevo rol
-        const mockUser = MOCK_USERS.find(u => u.rol === role);
-        if (mockUser) {
-          set({
-            user: {
-              ...currentUser,
-              rol: role,
-              name: mockUser.name,
-              email: mockUser.email,
-              initials: mockUser.initials,
-              nivel: mockUser.nivel,
-            },
-          });
-        }
+        // Buscar el mock correspondiente al nuevo rol para encapsular
+        // toda la identidad (nombre, email, avatar, nivel). Esto evita
+        // la inconsistencia cognitiva de ver "cartera@continental.com"
+        // con el nombre de María García.
+        const mockUser = MOCK_USERS.find((u) => u.rol === role);
+        if (!mockUser) return;
+
+        set({
+          user: {
+            ...currentUser,
+            rol: role,
+            name: mockUser.name,
+            email: mockUser.email,
+            initials: mockUser.initials,
+            nivel: mockUser.nivel,
+            // Copiar también los datos bancarios para que el archivo de
+            // dispersión use los del rol activo.
+            banco: mockUser.banco,
+            clabe: mockUser.clabe,
+            cuenta: mockUser.cuenta,
+            tipoIdentificacion: mockUser.tipoIdentificacion,
+            numeroIdentificacion: mockUser.numeroIdentificacion,
+          },
+          // Limpiar notificaciones: las del rol anterior ya no aplican
+          // (ej: "tienes vouchers pendientes" no le habla al analista
+          // de Comisiones). Cada rol arranca con sus propias alertas demo.
+          notifications: seedNotifications(role),
+        });
       },
 
       // ============================================================
@@ -486,11 +575,19 @@ export const useAppStore = create<AppState>()(
       },
 
       resetData: () => {
+        // Reset TOTAL: restaura operaciones, facturas, agencias y
+        // configuración a su estado de fábrica. Evita estados
+        // inconsistentes donde, por ejemplo, agencias quedan
+        // marcadas como inactivas y rompen relaciones con facturas.
+        const currentRole = get().user?.rol ?? "comercial";
         set({
           operations: DEMO_OPERATIONS,
           invoices: DEMO_INVOICES,
           agencias: DEMO_AGENCIAS,
-          availableOperationsCount: DEMO_OPERATIONS.filter(op => op.status === "disponible").length,
+          config: DEFAULT_CONFIG,
+          availableOperationsCount: DEMO_OPERATIONS.filter((op) => op.status === "disponible").length,
+          // Restaurar también las notificaciones del rol activo.
+          notifications: seedNotifications(currentRole),
         });
       },
 

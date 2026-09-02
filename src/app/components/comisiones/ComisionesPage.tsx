@@ -33,6 +33,7 @@ interface FacturaExpandida extends Invoice {
 export function ComisionesPage() {
   const invoices = useAppStore((s) => s.invoices);
   const agencias = useAppStore((s) => s.agencias);
+  const user = useAppStore((s) => s.user);
   const updateInvoiceStatus = useAppStore((s) => s.updateInvoiceStatus);
   const markInvoiceDispersed = useAppStore((s) => s.markInvoiceDispersed);
   const canApprove = usePermission("comisiones:approve");
@@ -156,19 +157,31 @@ export function ComisionesPage() {
       toast.error("Selecciona al menos una factura aprobada para dispersar");
       return;
     }
+    if (!user) {
+      toast.error("No hay usuario activo");
+      return;
+    }
 
-    const txt = generarArchivoDispersion(selectedInvoices);
-    const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `dispersion-${new Date().toISOString().split("T")[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      const txt = generarArchivoDispersion(selectedInvoices, user);
+      const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dispersion-${user.initials.toLowerCase()}-${new Date().toISOString().split("T")[0]}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
 
-    toast.success(`Archivo de dispersión generado (${selectedInvoices.length} facturas)`);
+      toast.success(`Archivo de dispersión generado (${selectedInvoices.length} facturas)`, {
+        description: `Titular: ${user.name} · Banco: ${user.banco}`,
+      });
+    } catch (err) {
+      toast.error("No se pudo generar el archivo", {
+        description: err instanceof Error ? err.message : "Error desconocido",
+      });
+    }
   };
 
   const format = (n: number) =>

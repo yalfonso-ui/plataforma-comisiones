@@ -96,12 +96,19 @@ export function StepArchivos({
           <CheckCircle2 className={`w-5 h-5 ${alertIcon.success} flex-shrink-0 mt-0.5`} />
           <div className="flex-1">
             <p className={`text-sm font-semibold ${alertText.success}`}>
-              Archivos validados correctamente
+              {validation.relaxed
+                ? "Archivos aceptados en modo demo"
+                : "Archivos validados correctamente"}
             </p>
             <p className={`text-xs ${alertText.success} opacity-80 mt-1`}>
               {validation.data.folio && <>Folio: <span className="font-mono">{validation.data.folio}</span></>}
               {validation.data.uuid && <> · UUID: <span className="font-mono">{validation.data.uuid.slice(0, 13)}...</span></>}
             </p>
+            {validation.relaxed && (
+              <p className={`text-xs ${alertText.success} opacity-80 mt-1 italic`}>
+                ⚠️ Modo demo: la validación cruzada folio/UUID se omitió. En producción se exigiría coincidencia estricta.
+              </p>
+            )}
             <p className={`text-xs ${alertText.success} opacity-80 mt-1`}>
               Puedes continuar al paso 4.
             </p>

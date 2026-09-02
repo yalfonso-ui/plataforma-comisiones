@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { X, AlertTriangle, AlertCircle, Info, CheckCircle2, LucideIcon } from "lucide-react";
 import {
   BTN_PRIMARY,
@@ -79,6 +79,19 @@ export function ConfirmDialog({
   confirmAction,
   children,
 }: ConfirmDialogProps) {
+  // A11y: cerrar con Escape cuando el diálogo está abierto.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
   if (!open) return null;
 
   const Icon = intentIcon[intent];

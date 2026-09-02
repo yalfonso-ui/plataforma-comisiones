@@ -11,12 +11,12 @@ export function AgentInfoCard() {
   const beneficiario = user?.name ?? "Agente Continental";
   const correo = user?.email ?? "agente@continental.com";
   const nivel = user?.nivel ?? "Nivel 1 - Comercial";
-
-  const bank = {
-    banco: "BBVA Bancomer",
-    clabe: "0121 8000 1234 5678 90",
-    cuenta: "1234 5678 90",
-  };
+  // Datos bancarios del usuario activo. Cuando se cambia de rol vía
+  // RoleSwitcher, estos vienen del mock correspondiente, garantizando
+  // que la tarjeta y el archivo de dispersión estén alineados.
+  const banco = user?.banco ?? "BBVA";
+  const clabeFmt = user?.clabe ? formatClabe(user.clabe) : "—";
+  const cuentaFmt = user?.cuenta ? formatCuenta(user.cuenta) : "—";
 
   return (
     <div className={`bg-white rounded-xl shadow-sm ${BORDER_DEFAULT} border p-6`}>
@@ -38,12 +38,12 @@ export function AgentInfoCard() {
           </p>
           <button
             onClick={() => {
-              if (confirm("¿Restaurar las comisiones y facturas a los datos de demostración?")) {
+              if (confirm("¿Restaurar la base de datos demo (operaciones, facturas, agencias y configuración)?")) {
                 resetData();
               }
             }}
             className={`text-xs ${TEXT_SECONDARY} hover:text-azul-oscuro underline transition-colors`}
-            title="Restaurar operaciones y facturas de demostración"
+            title="Restaurar operaciones, facturas, agencias y configuración a su estado inicial"
           >
             Resetear demo
           </button>
@@ -53,13 +53,25 @@ export function AgentInfoCard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <InfoItem icon={<User className="w-4 h-4" />} label="Beneficiario" value={beneficiario} />
         <InfoItem icon={<IdCard className="w-4 h-4" />} label="Nivel" value={nivel} />
-        <InfoItem icon={<Building2 className="w-4 h-4" />} label="Banco" value={bank.banco} />
-        <InfoItem icon={<Hash className="w-4 h-4" />} label="CLABE interbancaria" value={bank.clabe} copyable />
-        <InfoItem icon={<CreditCard className="w-4 h-4" />} label="Número de cuenta" value={bank.cuenta} copyable />
+        <InfoItem icon={<Building2 className="w-4 h-4" />} label="Banco" value={banco} />
+        <InfoItem icon={<Hash className="w-4 h-4" />} label="CLABE interbancaria" value={clabeFmt} copyable />
+        <InfoItem icon={<CreditCard className="w-4 h-4" />} label="Número de cuenta" value={cuentaFmt} copyable />
         <InfoItem icon={<Mail className="w-4 h-4" />} label="Correo" value={correo} copyable />
       </div>
     </div>
   );
+}
+
+/** Formatea una CLABE de 18 dígitos en bloques de 4 para legibilidad. */
+function formatClabe(clabe: string): string {
+  const clean = clabe.replace(/\s/g, "");
+  return clean.replace(/(.{4})/g, "$1 ").trim();
+}
+
+/** Formatea una cuenta en bloques de 4. */
+function formatCuenta(cuenta: string): string {
+  const clean = cuenta.replace(/\s/g, "");
+  return clean.replace(/(.{4})/g, "$1 ").trim();
 }
 
 function InfoItem({ icon, label, value, copyable = false }: { icon: React.ReactNode; label: string; value: string; copyable?: boolean }) {

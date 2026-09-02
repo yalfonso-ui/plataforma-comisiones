@@ -31,6 +31,7 @@ export function MiCartera() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const operations = useAppStore((state) => state.operations);
+  const agencias = useAppStore((state) => state.agencias);
   const updateOperationStatus = useAppStore((state) => state.updateOperationStatus);
   const { period, customStartDate, customEndDate } = useDateFilterStore();
 
@@ -435,6 +436,9 @@ export function MiCartera() {
                     <SortIcon column="plan" sortConfig={sortConfig} />
                   </button>
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-azul-oscuro uppercase tracking-wider">
+                  Agencia
+                </th>
                 <th className="px-6 py-4 text-right">
                   <button
                     onClick={() => handleSort("valor")}
@@ -485,6 +489,25 @@ export function MiCartera() {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`text-sm ${TEXT_SECONDARY}`}>{operation.plan}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    {operation.agenciaId ? (() => {
+                      const ag = agencias.find((a) => a.id === operation.agenciaId);
+                      return (
+                        <div className="flex items-center gap-1.5">
+                          <span className={`text-sm ${TEXT_SECONDARY} truncate max-w-[140px]`} title={ag?.nombre}>
+                            {ag?.nombre ?? "—"}
+                          </span>
+                          {ag?.codigoEVA && (
+                            <span className="text-[10px] font-mono text-text-secondary opacity-70 bg-canvas px-1.5 py-0.5 rounded">
+                              {ag.codigoEVA}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })() : (
+                      <span className={`text-xs ${TEXT_SECONDARY} opacity-60`}>—</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <span className="text-sm font-semibold text-azul-oscuro">

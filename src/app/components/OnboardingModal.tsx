@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Hourglass, CheckCircle2, FileText, ChevronLeft, ChevronRight, Sparkles, X } from "lucide-react";
 import { useAppStore } from "../store/appStore";
 import {
@@ -16,32 +16,32 @@ import {
 const SLIDES = [
   {
     title: "¡Bienvenido a Continental Comisiones!",
-    description: "Aquí gestionas tus comisiones de forma rápida y transparente. Te mostraremos en 4 pasos cómo funciona el flujo completo.",
+    description: "Gestiona tus comisiones y facturación desde un único lugar. Te mostraremos el flujo unificado en 4 pasos.",
     icon: Sparkles,
     color: "from-[#00184C] to-[#002a6e]",
   },
   {
-    title: "1. Cartera: tus comisiones del periodo",
-    description: "Consulta todas las comisiones generadas. Cada voucher pasa por 4 estados. Usa los filtros y la búsqueda para encontrarlos fácilmente.",
+    title: "1. Mis vouchers y facturación guiada",
+    description: "Consulta todas las comisiones generadas. Cada voucher pasa por 4 estados: pendiente → confirmado → disponible. Cuando esté disponible, inicias la facturación con un clic.",
     icon: FileText,
     color: "from-orange-500 to-amber-500",
   },
   {
-    title: "2. Estados de la comisión",
-    description: "Pendiente de confirmación → Pendiente de recaudo → Pago confirmado → Disponible para facturar. Sigue cada uno desde tu cartera.",
+    title: "2. Wizard de facturación en 4 pasos",
+    description: "1) Selecciona operaciones. 2) Elige tipo de cliente (Jurídica o Natural con ISR). 3) Sube XML y PDF — el sistema valida que correspondan al mismo comprobante. 4) Confirma y envía.",
     icon: Clock,
     color: "from-orange-400 to-rose-500",
     states: true,
   },
   {
-    title: "3. Factura tus comisiones",
-    description: "Cuando un voucher esté disponible, ve a Facturar, selecciona las comisiones del periodo, sube tu XML y PDF, y envía. Procesamos en 24-48h.",
-    icon: FileText,
+    title: "3. Aprobación y dispersión",
+    description: "Tu factura pasa por Cartera (aprobación inicial) y luego por Comisiones (validación fiscal y dispersión). El módulo de Comisiones genera el archivo plano ACH con tus datos bancarios.",
+    icon: CheckCircle2,
     color: "from-green-500 to-emerald-600",
   },
   {
-    title: "4. Revisa el Historial",
-    description: "Cada factura enviada aparece aquí con su estado. Descarga tus XML/PDF cuando sea aprobada.",
+    title: "4. Historial y trazabilidad",
+    description: "Sigue el estado de cada factura en /historial. Verás el desglose fiscal completo, podrás descargar XML/PDF y filtrar por fecha o estado.",
     icon: CheckCircle2,
     color: "from-blue-500 to-cyan-500",
   },
@@ -54,6 +54,19 @@ export function OnboardingModal() {
   const resetOnboarding = useAppStore((s) => s.resetOnboarding);
 
   const open = !onboardingCompleted;
+
+  // A11y: Escape cierra el tutorial (equivale a "Saltar").
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        completeOnboarding();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, completeOnboarding]);
 
   if (!open) return null;
 
@@ -118,13 +131,13 @@ export function OnboardingModal() {
                 icon={Hourglass}
                 className={PENDIENTE_RECAUDO_CLASS}
                 title="Pendiente de recaudo"
-                description="La empresa procesa el pago"
+                description="En proceso — sin acción del comercial"
               />
               <StateCard
                 icon={CheckCircle2}
                 className={CONFIRMADO_CLASS}
                 title="Pago confirmado"
-                description="Recaudado por la empresa"
+                description="Recaudo verificado por la empresa"
               />
               <StateCard
                 icon={CheckCircle2}
