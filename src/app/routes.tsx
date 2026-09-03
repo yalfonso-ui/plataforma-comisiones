@@ -50,6 +50,21 @@ function RequireAnyRole({ permissions, children }: { permissions: string[]; chil
 }
 
 /**
+ * Catch-all inteligente: cualquier ruta no existente redirige al login
+ * si no hay sesión. Si hay sesión, muestra el NotFoundPage con accesos
+ * directos al dashboard. Esto evita que rutas desconocidas en GitHub
+ * Pages (que sirven 404.html → index.html) queden atrapadas.
+ */
+function NotFoundRouter() {
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+  return <NotFoundPage />;
+}
+
+/**
  * Layout raíz: incluye ScrollToTop DENTRO del contexto del router
  * para que useLocation() funcione correctamente.
  */
@@ -91,7 +106,7 @@ export const router = createBrowserRouter([
           { path: "config", element: <RequireRole permission="config:manage"><ConfigPage /></RequireRole> },
         ],
       },
-      { path: "*", Component: NotFoundPage },
+      { path: "*", Component: NotFoundRouter },
     ],
   },
 ]);

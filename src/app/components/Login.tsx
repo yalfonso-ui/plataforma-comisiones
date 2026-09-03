@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation, Navigate } from "react-router";
 import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, Shield } from "lucide-react";
 import logoContinental from "../../assets/Logo continental.png";
 import { useAppStore } from "../store/appStore";
@@ -11,10 +11,19 @@ export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const login = useAppStore((s) => s.login);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Si el usuario YA está autenticado y entra a /login, lo mandamos
+  // al dashboard. Asi /login siempre es la puerta de entrada
+  // para sesiones nuevas y nunca queda atrapado.
+  if (isAuthenticated) {
+    const from = (location.state as { from?: string } | null)?.from;
+    return <Navigate to={from && from !== "/login" ? from : "/resumen"} replace />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

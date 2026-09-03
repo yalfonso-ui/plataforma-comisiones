@@ -1,8 +1,21 @@
-import { Link } from "react-router";
+import { Link, Navigate, useLocation } from "react-router";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { BTN_PRIMARY, BTN_SECONDARY, BG_CANVAS, TEXT_SECONDARY } from "../utils/ui";
+import { useAppStore } from "../store/appStore";
 
 export function NotFoundPage() {
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const location = useLocation();
+
+  // Si el usuario NO está autenticado, lo mandamos al login
+  // (porque en GitHub Pages cualquier ruta no existente renderiza
+  // este componente via el 404.html fallback). Esto centraliza
+  // el "siempre caer en login" como puerta de entrada.
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+  }
+
+  // Si está autenticado, mostramos el 404 friendly con accesos directos.
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
       <div className="text-center max-w-lg">
