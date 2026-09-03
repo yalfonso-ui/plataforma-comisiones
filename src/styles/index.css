@@ -38,7 +38,6 @@
 button:not(:disabled):focus-visible,
 a:focus-visible {
   outline: none;
-  ring: 2px;
   box-shadow: 0 0 0 2px var(--color-azul-oscuro), 0 0 0 4px white;
   border-radius: 6px;
 }
