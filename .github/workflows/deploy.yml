@@ -43,19 +43,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Auditoria: detecta imports faltantes de hooks de react-router.
+      - name: Audit react-router hooks
+        run: npm run audit
+
       - name: Build
+        # El plugin generate404Plugin de vite.config.ts genera dist/404.html
+        # como copia de dist/index.html automaticamente. Tambien copia
+        # .nojekyll via el plugin copyNojekyllPlugin. No necesitamos
+        # steps adicionales aqui.
         env:
           VITE_BASE_PATH: /plataforma-comisiones/
         run: pnpm run build
-
-      - name: Generar 404.html (SPA fallback)
-        # GitHub Pages sirve 404.html cuando una ruta no existe.
-        # Como es SPA, copiamos index.html para que React Router
-        # tome el control de la navegación.
-        run: cp dist/index.html dist/404.html
-
-      - name: Copiar .nojekyll
-        run: cp public/.nojekyll dist/.nojekyll 2>/dev/null || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -68,9 +67,6 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # Quitamos el environment para evitar que el job se salte si
-    # github-pages no existe manualmente. actions/deploy-pages@v4
-    # hace el deploy directo sin requerir environment pre-creado.
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
