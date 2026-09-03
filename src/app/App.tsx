@@ -4,10 +4,10 @@ import { Toaster } from "sonner";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 
 /**
- * FIX: ScrollToTop se movió DENTRO del árbol del router (routes.tsx)
- * como parte de RootLayout. Antes estaba como hermano de <RouterProvider>,
- * lo que causaba un crash porque useLocation() requiere estar dentro
- * del contexto del router.
+ * NOTA: ScrollToTop se movió DENTRO del árbol del router (routes.tsx)
+ * como parte de RootLayout. Si se renderiza como hermano de RouterProvider,
+ * el hook que usa useLocation() crashea porque necesita el contexto
+ * del router activo.
  */
 export default function App() {
   return (
