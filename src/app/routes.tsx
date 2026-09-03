@@ -51,13 +51,17 @@ function RequireAnyRole({ permissions, children }: { permissions: string[]; chil
 
 /**
  * Catch-all inteligente: cualquier ruta no existente redirige al login
- * si no hay sesión. Si hay sesión, muestra el NotFoundPage con accesos
- * directos al dashboard. Esto evita que rutas desconocidas en GitHub
- * Pages (que sirven 404.html → index.html) queden atrapadas.
+ * si no hay sesión o invitación validada. Si ambos están OK,
+ * muestra el NotFoundPage con accesos directos al dashboard. Esto
+ * evita que rutas desconocidas en GitHub Pages (que sirven
+ * 404.html → index.html) queden atrapadas.
  */
 function NotFoundRouter() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const location = useLocation();
+  // Importante: la doble validación la hace NotFoundPage internamente;
+  // aquí solo necesitamos asegurar que cualquier ruta no existente
+  // NO renderice contenido si el usuario no pasó por el gate.
   if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }

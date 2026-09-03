@@ -2,14 +2,19 @@ import { Navigate, useLocation } from "react-router";
 import { useAppStore } from "../store/appStore";
 import { ReactNode } from "react";
 import { BG_CANVAS } from "../utils/ui";
+import { isInviteValidated } from "../auth/inviteTokens";
 
 interface Props {
   children: ReactNode;
 }
 
 /**
- * Protege una ruta: si no hay sesión, redirige a /login guardando
- * la URL intentada en `state.from` para retornar al usuario.
+ * Protege una ruta con DOS validaciones:
+ *  1. Sesión activa en el store (isAuthenticated).
+ *  2. Flag de invitación validada en sessionStorage.
+ *
+ * Si cualquiera falla, redirige a /login guardando la URL intentada
+ * en `state.from` para retornar al usuario después.
  *
  * Mientras se rehidrata el estado persistido en `localStorage`,
  * muestra un loader mínimo (no pantalla blanca).
@@ -30,7 +35,7 @@ export function RequireAuth({ children }: Props) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isInviteValidated()) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 

@@ -1,21 +1,45 @@
-import { useState } from "react";
-import { useNavigate, useLocation, Navigate } from "react-router";
-import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, Shield } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation, Navigate, useSearchParams } from "react-router";
+import { Mail, Lock, Eye, EyeOff, LogIn, ArrowRight, Shield, KeyRound, AlertCircle } from "lucide-react";
 import logoContinental from "../../assets/Logo continental.png";
 import { useAppStore } from "../store/appStore";
 import { MOCK_USERS } from "../auth/mockUsers";
 import { ROLE_META, type AppRole } from "../auth/permissions";
+import {
+  isValidInviteToken,
+  isInviteValidated,
+  setInviteValidated as persistInviteValidated,
+} from "../auth/inviteTokens";
 import { toast } from "sonner";
 
 export function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const login = useAppStore((s) => s.login);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [inviteToken, setInviteToken] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [inviteValidated, setInviteValidated] = useState<boolean>(() => isInviteValidated());
+
+  // Si la URL trae ?token=XXX y es válido, lo aceptamos automáticamente.
+  useEffect(() => {
+    const urlToken = searchParams.get("token");
+    if (urlToken && isValidInviteToken(urlToken)) {
+      persistInviteValidated(true);
+      setInviteValidated(true);
+      // Limpiar el token de la URL para no exponerlo en el historial.
+      searchParams.delete("token");
+      navigate({ pathname: location.pathname, search: searchParams.toString() }, { replace: true });
+      toast.success("Acceso concedido", {
+        description: "Token de invitación validado. Ingresa con tus credenciales.",
+      });
+    }
+  }, [searchParams, location.pathname, navigate]);
 
   // Si el usuario YA está autenticado y entra a /login, lo mandamos
   // al dashboard. Asi /login siempre es la puerta de entrada
@@ -25,6 +49,81 @@ export function Login() {
     return <Navigate to={from && from !== "/login" ? from : "/resumen"} replace />;
   }
 
+  // ── Pantalla 1: Validar token de invitación ──
+  if (!inviteValidated) {
+    const handleInviteSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (isValidInviteToken(inviteToken)) {
+        persistInviteValidated(true);
+        setInviteValidated(true);
+        toast.success("Acceso concedido", {
+          description: "Ahora ingresa con tus credenciales.",
+        });
+      } else {
+        toast.error("Código de invitación inválido", {
+          description: "Verifica el código con quien te invitó a la demo.",
+        });
+      }
+    };
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-azul-oscuro via-azul-oscuro to-[#002a6e] p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 sm:p-10">
+          {/* Header */}
+          <div className="flex justify-center mb-6">
+            <img src={logoContinental} alt="Continental" className="h-10" />
+          </div>
+
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-celeste-soft rounded-2xl mb-4">
+              <KeyRound className="w-7 h-7 text-azul-oscuro" />
+            </div>
+            <h1 className="text-2xl font-bold text-azul-oscuro">Acceso restringido</h1>
+            <p className="text-text-secondary mt-2 text-sm">
+              Esta demo es privada. Ingresa el código de invitación que te compartieron.
+            </p>
+          </div>
+
+          <form onSubmit={handleInviteSubmit} className="space-y-5">
+            <div>
+              <label htmlFor="invite" className="block text-sm font-medium text-azul-oscuro mb-2">
+                Código de invitación
+              </label>
+              <input
+                id="invite"
+                type="text"
+                required
+                autoFocus
+                autoComplete="off"
+                value={inviteToken}
+                onChange={(e) => setInviteToken(e.target.value)}
+                placeholder="CC-2026-..."
+                className="w-full px-4 py-3 border border-border-base rounded-lg focus:outline-none focus:ring-2 focus:ring-celeste focus:border-celeste transition-colors font-mono text-sm"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full px-6 py-3 bg-azul-oscuro text-white rounded-lg hover:bg-azul-oscuro-hover transition-all font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
+            >
+              <Shield className="w-4 h-4" />
+              Validar acceso
+            </button>
+          </form>
+
+          <div className="mt-6 flex items-start gap-2 text-xs text-text-secondary bg-canvas rounded-lg p-3">
+            <AlertCircle className="w-4 h-4 text-text-secondary flex-shrink-0 mt-0.5" />
+            <p>
+              ¿No tienes un código? Esta demo es interna. Pídele el enlace de invitación
+              a quien te la compartió.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Pantalla 2: Credenciales ──
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -44,6 +143,12 @@ export function Login() {
   const quickLogin = (mockEmail: string) => {
     setEmail(mockEmail);
     setPassword("demo");
+  };
+
+  const handleLogoutInvite = () => {
+    persistInviteValidated(false);
+    setInviteValidated(false);
+    setInviteToken("");
   };
 
   return (
@@ -85,8 +190,18 @@ export function Login() {
           </div>
 
           <div>
-            <h2 className="text-2xl font-bold text-azul-oscuro">Iniciar sesión</h2>
-            <p className="text-text-secondary mt-1 text-sm">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-2xl font-bold text-azul-oscuro">Iniciar sesión</h2>
+              <button
+                type="button"
+                onClick={handleLogoutInvite}
+                className="text-xs text-text-secondary hover:text-azul-oscuro underline"
+                title="Cerrar el acceso de invitación y volver a pedir código"
+              >
+                Cambiar código de invitación
+              </button>
+            </div>
+            <p className="text-text-secondary text-sm">
               Ingresa tus credenciales para acceder a tu portal de comisiones.
             </p>
           </div>
