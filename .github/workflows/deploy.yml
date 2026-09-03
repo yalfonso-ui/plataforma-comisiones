@@ -49,6 +49,12 @@ jobs:
         # al index.html para que React Router tome el control.
         run: cp dist/index.html dist/404.html
 
+      - name: Copiar .nojekyll
+        # Evita que GitHub Pages procese el sitio con Jekyll, lo cual
+        # ignoraría archivos con _ al inicio y rompería los assets
+        # de Vite (que usa _ en algunos casos) y el SPA routing.
+        run: cp public/.nojekyll dist/.nojekyll 2>/dev/null || true
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

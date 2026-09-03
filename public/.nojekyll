@@ -1,0 +1,3 @@
+# Indica a GitHub Pages que NO procese el sitio con Jekyll.
+# Necesario para que archivos como _redirects, .well-known/, etc.
+# se sirvan tal cual sin que Jekyll los ignore o procese.
