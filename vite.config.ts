@@ -17,6 +17,9 @@ function figmaAssetResolver() {
 }
 
 export default defineConfig({
+  // base path para GitHub Pages (https://yalfonso-ui.github.io/plataforma-comisiones/).
+  // El default '/' funciona en localhost pero rompe los assets en Pages.
+  base: process.env.VITE_BASE_PATH || '/plataforma-comisiones/',
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
