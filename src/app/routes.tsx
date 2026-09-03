@@ -81,36 +81,46 @@ function RootLayout() {
   );
 }
 
-export const router = createBrowserRouter([
-  {
-    element: <RootLayout />,
-    children: [
-      { path: "/login", Component: Login },
-      {
-        path: "/",
-        Component: () => (
-          <RequireAuth>
-            <DashboardLayout />
-          </RequireAuth>
-        ),
-        children: [
-          { index: true, element: <Navigate to="/resumen" replace /> },
-          { path: "resumen", Component: Resumen },
-          // /cartera unificado: accesible para comercial (ver vouchers)
-          // y para cartera/comisiones/admin (aprobar facturas).
-          { path: "cartera", element: <RequireAnyRole permissions={["cartera:view", "facturar:view_own"]}><CarteraRouter /></RequireAnyRole> },
-          // /mi-cartera redirige a /cartera — compat con deep-links antiguos.
-          { path: "mi-cartera", element: <Navigate to="/cartera" replace /> },
-          { path: "facturar", element: <RequireRole permission="facturar:create"><FacturarPage /></RequireRole> },
-          { path: "historial", Component: Historial },
-          { path: "perfil", Component: ProfilePage },
-          { path: "comisiones", element: <RequireRole permission="comisiones:view"><ComisionesPage /></RequireRole> },
-          { path: "agencias", element: <RequireRole permission="agencias:manage"><AgenciasPage /></RequireRole> },
-          { path: "usuarios", element: <RequireRole permission="usuarios:manage"><UsuariosPage /></RequireRole> },
-          { path: "config", element: <RequireRole permission="config:manage"><ConfigPage /></RequireRole> },
-        ],
-      },
-      { path: "*", Component: NotFoundRouter },
-    ],
-  },
-]);
+/**
+ * basename del router: en dev es '/', en build (GitHub Pages) es '/plataforma-comisiones/'.
+ * Vite inyecta `import.meta.env.BASE_URL` automáticamente según el `base` de vite.config.ts.
+ * Esto garantiza que React Router maneje correctamente las rutas bajo el subpath de Pages.
+ */
+const BASENAME = import.meta.env.BASE_URL === '/' ? '' : import.meta.env.BASE_URL;
+
+export const router = createBrowserRouter(
+  [
+    {
+      element: <RootLayout />,
+      children: [
+        { path: "/login", Component: Login },
+        {
+          path: "/",
+          Component: () => (
+            <RequireAuth>
+              <DashboardLayout />
+            </RequireAuth>
+          ),
+          children: [
+            { index: true, element: <Navigate to="/resumen" replace /> },
+            { path: "resumen", Component: Resumen },
+            // /cartera unificado: accesible para comercial (ver vouchers)
+            // y para cartera/comisiones/admin (aprobar facturas).
+            { path: "cartera", element: <RequireAnyRole permissions={["cartera:view", "facturar:view_own"]}><CarteraRouter /></RequireAnyRole> },
+            // /mi-cartera redirige a /cartera — compat con deep-links antiguos.
+            { path: "mi-cartera", element: <Navigate to="/cartera" replace /> },
+            { path: "facturar", element: <RequireRole permission="facturar:create"><FacturarPage /></RequireRole> },
+            { path: "historial", Component: Historial },
+            { path: "perfil", Component: ProfilePage },
+            { path: "comisiones", element: <RequireRole permission="comisiones:view"><ComisionesPage /></RequireRole> },
+            { path: "agencias", element: <RequireRole permission="agencias:manage"><AgenciasPage /></RequireRole> },
+            { path: "usuarios", element: <RequireRole permission="usuarios:manage"><UsuariosPage /></RequireRole> },
+            { path: "config", element: <RequireRole permission="config:manage"><ConfigPage /></RequireRole> },
+          ],
+        },
+        { path: "*", Component: NotFoundRouter },
+      ],
+    },
+  ],
+  { basename: BASENAME },
+);

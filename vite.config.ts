@@ -18,11 +18,17 @@ function figmaAssetResolver() {
 }
 
 /**
- * Plugin que genera 404.html como copia de index.html al terminar el build.
+ * Plugin que genera 404.html como copia exacta de index.html.
  *
  * GitHub Pages sirve 404.html cuando una ruta no existe físicamente
- * (ej: /plataforma-comisiones/ruta-inexistente). Como es una SPA,
- * 404.html debe ser el index.html para que React Router tome el control.
+ * (ej: /plataforma-comisiones/resumen). Como es una SPA:
+ *   1. El 404.html carga los mismos assets que index.html.
+ *   2. React Router con `basename="/plataforma-comisiones/"` lee la
+ *      URL del navegador, extrae la ruta interna y renderiza el
+ *      componente correcto.
+ *
+ * Resultado: al refrescar cualquier ruta, GitHub Pages sirve 404.html,
+ * React arranca y React Router muestra la página correspondiente.
  *
  * Hacer esto como plugin (en lugar de un step del workflow de CI)
  * garantiza que SIEMPRE se genere, en builds locales y en Pages.
@@ -37,7 +43,7 @@ function generate404Plugin() {
       const notFoundPath = path.join(distDir, '404.html');
       if (fs.existsSync(indexPath)) {
         fs.copyFileSync(indexPath, notFoundPath);
-        console.log('✓ 404.html generado para SPA fallback');
+        console.log('✓ 404.html generado como copia de index.html para SPA fallback');
       }
     },
   };
