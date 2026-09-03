@@ -3,14 +3,13 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  workflow_dispatch: # permite lanzar el deploy manualmente desde la pestaña Actions
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Evita corridas concurrentes y cancela builds obsoletos en la misma rama
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -22,37 +21,42 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # IMPORTANTE: setup-node con pnpm cache debe ir ANTES de pnpm/action-setup
+      # para que el cache key se genere correctamente.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: 22
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
+          run_install: false  # nosotros hacemos el install explícitamente
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build
-        # VITE_BASE_PATH ya está definido en vite.config.ts, pero
-        # lo pasamos explícito para que quede claro en el log.
         env:
           VITE_BASE_PATH: /plataforma-comisiones/
         run: pnpm run build
 
       - name: Generar 404.html (SPA fallback)
         # GitHub Pages sirve 404.html cuando una ruta no existe en
-        # el archivo físico. Como es una SPA, el 404 debe redirigir
-        # al index.html para que React Router tome el control.
+        # el archivo físico. Como es una SPA, el 404 debe ser una copia
+        # del index.html para que React Router tome el control.
         run: cp dist/index.html dist/404.html
 
       - name: Copiar .nojekyll
-        # Evita que GitHub Pages procese el sitio con Jekyll, lo cual
-        # ignoraría archivos con _ al inicio y rompería los assets
-        # de Vite (que usa _ en algunos casos) y el SPA routing.
         run: cp public/.nojekyll dist/.nojekyll 2>/dev/null || true
 
       - name: Setup Pages
