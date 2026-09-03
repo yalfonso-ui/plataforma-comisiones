@@ -2,17 +2,12 @@ import { Link, Navigate, useLocation } from "react-router";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { BTN_PRIMARY, BTN_SECONDARY, BG_CANVAS, TEXT_SECONDARY } from "../utils/ui";
 import { useAppStore } from "../store/appStore";
-import { isInviteValidated } from "../auth/inviteTokens";
 
 export function NotFoundPage() {
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const location = useLocation();
 
-  // Si el usuario NO está autenticado o NO validó invitación,
-  // lo mandamos al login. En GitHub Pages cualquier ruta no
-  // existente renderiza este componente via el 404.html fallback,
-  // así que este es el lugar ideal para redirigir al login.
-  if (!isAuthenticated || !isInviteValidated()) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
