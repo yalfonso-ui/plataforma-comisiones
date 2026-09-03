@@ -21,8 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # IMPORTANTE: setup-node con pnpm cache debe ir ANTES de pnpm/action-setup
-      # para que el cache key se genere correctamente.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -32,7 +30,7 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           version: 9
-          run_install: false  # nosotros hacemos el install explícitamente
+          run_install: false
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -51,9 +49,9 @@ jobs:
         run: pnpm run build
 
       - name: Generar 404.html (SPA fallback)
-        # GitHub Pages sirve 404.html cuando una ruta no existe en
-        # el archivo físico. Como es una SPA, el 404 debe ser una copia
-        # del index.html para que React Router tome el control.
+        # GitHub Pages sirve 404.html cuando una ruta no existe.
+        # Como es SPA, copiamos index.html para que React Router
+        # tome el control de la navegación.
         run: cp dist/index.html dist/404.html
 
       - name: Copiar .nojekyll
@@ -70,10 +68,12 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # Quitamos el environment para evitar que el job se salte si
+    # github-pages no existe manualmente. actions/deploy-pages@v4
+    # hace el deploy directo sin requerir environment pre-creado.
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
