@@ -78,9 +78,10 @@ export default defineConfig(({ command }) => ({
     allowedHosts: true,
   },
   // En dev: base '/' para que funcione en localhost:5173/ sin subpath.
-  // En build: usa VITE_BASE_PATH (por defecto '/plataforma-comisiones/' para GitHub Pages).
-  // Esto evita pantalla en blanco en local y mantiene compatibilidad con Pages.
-  base: command === 'serve' ? '/' : (process.env.VITE_BASE_PATH || '/plataforma-comisiones/'),
+  // En build: usa VITE_BASE_PATH.
+  //   - GitHub Pages: VITE_BASE_PATH='/plataforma-comisiones/'
+  //   - Netlify u otro root hosting: VITE_BASE_PATH='/'
+  base: command === 'serve' ? '/' : (process.env.VITE_BASE_PATH || '/'),
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
