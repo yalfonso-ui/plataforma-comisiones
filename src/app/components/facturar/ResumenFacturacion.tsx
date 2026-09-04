@@ -30,27 +30,28 @@ interface ResumenFacturacionProps {
  * Panel lateral sticky — comportamiento "carrito flotante persistente"
  * (estilo Mercado Libre).
  *
- * El panel se mantiene anclado al top del viewport durante todo el scroll,
- * sin scroll interno y sin desaparecer hasta que el contenedor padre
- * (grid del wizard) salga del viewport. El usuario hace scroll en la
- * tabla de la izquierda y el resumen permanece visible en paralelo,
- * permitiendo ver los totales actualizándose en tiempo real.
+ * El panel se mantiene anclado al viewport durante todo el scroll,
+ * delimitado por el header (navbar) por arriba y el footer (WizardFooter)
+ * por abajo. El usuario hace scroll en la tabla de la izquierda y el
+ * resumen permanece visible en paralelo, permitiendo ver los totales
+ * actualizándose en tiempo real.
  *
  * Layout:
  *  - Contenedor `<aside>` es sticky dentro del grid (col-span-1).
- *  - `top-24` (96px) = navbar (h-16 = 64px) + breadcrumb + padding main
- *    (~32px). Equivale a la altura a la que está el título del step
- *    activo — el panel queda alineado con él al hacer scroll.
- *  - `max-h-[calc(100vh-112px)]` = viewport - top-24 - margen inferior (16px).
- *    Limita la altura para que cuando el contenido crezca (impuestos
- *    desplegados) no desborde por debajo del fold.
- *  - `z-10` explícito para que el panel viva en su propio stacking context
- *    (sin chocar con header `z-30`, sidebar `z-10`, modal `z-50`, footer sticky `z-50`).
- *  - SIN `overflow-y-auto`: el panel NO tiene scroll interno. El usuario
- *    hace scroll en la página y el panel se mantiene anclado al top
- *    del viewport. Si el contenido del panel excede `max-h`, queda
- *    cortado por abajo (no scrolleable) — pero el contenido crítico
- *    siempre cabe en este alto.
+ *  - `top-16` (4rem = 64px) = exactamente la altura del navbar
+ *    (DashboardLayout h-16). El borde superior del panel queda pegado
+ *    al borde inferior del header — el panel nunca pasa por detrás.
+ *  - `max-h-[calc(100vh-10rem)]` = viewport - top (4rem) - footer (~5rem)
+ *    - safety (1rem). El borde inferior queda ~16px por encima del
+ *    WizardFooter (sticky bottom-0, pt-3 pb-4 ≈ 65-92px según muestre
+ *    el hint inline). El panel nunca se mete debajo del botón Radicar.
+ *  - `overflow-y-auto` permite scroll INTERNO cuando el contenido
+ *    excede max-h (impuestos desplegados en pantallas chicas).
+ *    position: sticky sigue anclándose al page scroll container;
+ *    solo el CONTENIDO del aside scrollea.
+ *  - `z-10` para que el panel viva en su propio stacking context
+ *    (sin chocar con header `z-30`, sidebar `z-10`, modal `z-50`,
+ *    footer sticky `z-50`).
  *  - `self-start` en el contenedor padre para que sticky funcione
  *    correctamente (sin esto, el aside se estira al alto del hermano
  *    y el sticky queda anulado).
@@ -130,30 +131,34 @@ export function ResumenFacturacion({ fiscal, tipoCliente, selectedCount, selecte
 
   return (
     // =================================================================
-    // PANEL LATERAL STICKY — scroll global de página (no interno)
+    // PANEL LATERAL STICKY — delimitado por header (navbar) y footer (wizard).
     //
-    // Arquitectura final:
-    // - La página entera scrollea de forma natural.
-    // - El <aside> usa `sticky top-24` para anclarse al viewport a la
-    //   altura del título del step.
-    // - `max-h-[calc(100vh-7rem)]` limita la altura del panel para
-    //   que cuando el contenido crece (impuestos desplegados), no
-    //   desborde por debajo del fold. Sin overflow interno — el
-    //   contenido que no cabe queda cortado por abajo (no scrolleable)
-    //   y el contenido crítico (cabecera + valor base + total) siempre cabe.
+    // Arquitectura:
+    // - La página entera scrollea de forma natural (window scroll).
+    // - El <aside> usa `sticky top-16` (4rem) para anclarse al viewport
+    //   JUSTO debajo del navbar (DashboardLayout h-16 = 64px). El borde
+    //   superior del panel nunca queda tapado por el header.
+    // - `max-h-[calc(100vh-10rem)]` delimita el panel por abajo:
+    //     100vh - (top 4rem) - (footer ~5rem) - (safety 1rem)
+    //   El borde inferior queda ~16px por encima del WizardFooter
+    //   (sticky bottom-0, pt-3 pb-4 ≈ 65-92px según muestre el hint
+    //   inline), garantizando que el panel nunca se mete debajo del
+    //   footer ni del botón Radicar.
+    // - `overflow-y-auto` permite scroll INTERNO cuando el contenido
+    //   excede max-h (impuestos desplegados en pantallas chicas). El
+    //   sticky NO se rompe: position: sticky sigue anclándose al page
+    //   scroll container, y solo el CONTENIDO del aside scrollea.
     // - `z-10` para vivir en su propio stacking context sin chocar con
     //   header (z-30), modal (z-50) ni footer fijo (z-50).
     // - SIN `transform`, sin `filter`, sin `will-change`, sin `contain`
     //   en ningún ancestro — todos rompen position: sticky.
-    // - SIN `overflow-y-auto` interno — eso crearía un nuevo scroll
-    //   container que anula el sticky.
     // - El contenedor padre <div className="lg:col-span-1 self-start">
     //   en FacturarPage.tsx provee `align-self: start` (CRÍTICO en
     //   CSS Grid para que sticky funcione — sin esto, el item se estira
     //   al alto del hermano y el sticky queda anulado).
     // =================================================================
     <aside
-      className="self-start sticky top-24 z-10 max-h-[calc(100vh-9rem)] space-y-1.5"
+      className="self-start sticky top-16 z-10 max-h-[calc(100vh-10rem)] space-y-1.5 overflow-y-auto"
     >
       {/* Cabecera — más compacta (p-3 → p-2.5) */}
       <div className="bg-azul-oscuro rounded-xl shadow-lg p-2.5 text-white">

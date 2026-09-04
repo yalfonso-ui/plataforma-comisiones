@@ -39,14 +39,6 @@ export function StepClienteImpuestos({
     //    contraste de ritmo con el panel derecho.
     // =================================================================
     <div className="space-y-3">
-      {/* Header — más compacto */}
-      <div className={`bg-celeste-soft border border-celeste-subtle rounded-xl p-3`}>
-        <h3 className="text-azul-oscuro font-semibold text-sm mb-0.5">Paso 2 — Cliente e impuestos</h3>
-        <p className={`text-xs ${TEXT_SECONDARY}`}>
-          Selecciona el tipo de cliente y si aplica ISR. El resumen de la derecha se actualiza en tiempo real.
-        </p>
-      </div>
-
       {/* Tipo de cliente — id para scroll-asistido */}
       <div
         id={SECTION_IDS.tipoCliente}

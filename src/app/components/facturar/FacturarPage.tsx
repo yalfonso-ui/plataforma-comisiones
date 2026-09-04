@@ -4,6 +4,7 @@
 // ============================================================
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { CheckCircle2, FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import { useFacturarWizard } from "./useFacturarWizard";
 import { WizardHeader } from "./WizardHeader";
 import { WizardFooter } from "./WizardFooter";
 import { ResumenFacturacion } from "./ResumenFacturacion";
+import { StepHeader } from "./StepHeader";
 import { StepSeleccionOperaciones } from "./StepSeleccionOperaciones";
 import { StepClienteImpuestos } from "./StepClienteImpuestos";
 import { StepArchivos } from "./StepArchivos";
@@ -24,6 +26,37 @@ import { useScrollHighlight } from "../../hooks/useScrollHighlight";
 
 import { BORDER_DEFAULT, TEXT_SECONDARY } from "../../utils/ui";
 import type { TipoCliente } from "../../types/domain";
+
+// ============================================================
+// Cabeceras de cada step del wizard.
+// Fuente única de verdad — se renderizan como HERMANO del grid
+// para que la columna izquierda (tabla/contenido) y la columna
+// derecha (Resumen de Facturación) arranquen al mismo Y.
+// ============================================================
+const STEP_HEADERS: Record<1 | 2 | 3 | 4, { title: string; description?: ReactNode; compact?: boolean }> = {
+  1: {
+    title: "Paso 1 — Selecciona las operaciones",
+    description: "Marca una o más operaciones disponibles para incluirlas en la factura. Puedes seleccionarlas todas con el checkbox de la cabecera.",
+  },
+  2: {
+    title: "Paso 2 — Cliente e impuestos",
+    description: "Selecciona el tipo de cliente y si aplica ISR. El resumen de la derecha se actualiza en tiempo real.",
+    compact: true,
+  },
+  3: {
+    title: "Paso 3 — Archivos XML y PDF",
+    description: "Sube tu comprobante fiscal en formato XML y su representación en PDF. El sistema verificará que correspondan al mismo comprobante antes de permitir continuar.",
+  },
+  4: {
+    title: "Paso 4 — Confirma y radica",
+    description: (
+      <>
+        Revisa que toda la información sea correcta. Al radicar, la factura se enviará
+        automáticamente al equipo de <strong>Cartera</strong> para su aprobación.
+      </>
+    ),
+  },
+};
 
 export function FacturarPage() {
   const navigate = useNavigate();
@@ -196,6 +229,18 @@ export function FacturarPage() {
         }}
         />
       </div>
+
+      {/* =================================================================
+         CABECERA DEL STEP — vive ARRIBA del grid (hermano), no dentro
+         de la columna izquierda. Esto garantiza que la tabla y el panel
+         lateral de Resumen de Facturación arranquen al mismo Y, en la
+         misma fila del grid.
+         ================================================================= */}
+      <StepHeader
+        title={STEP_HEADERS[wizard.step].title}
+        description={STEP_HEADERS[wizard.step].description}
+        compact={STEP_HEADERS[wizard.step].compact}
+      />
 
       {/* =================================================================
          GRID PRINCIPAL CON SCROLL GLOBAL DE PÁGINA

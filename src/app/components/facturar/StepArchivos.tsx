@@ -35,15 +35,6 @@ export function StepArchivos({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className={`bg-celeste-soft border border-celeste-subtle rounded-xl p-4`}>
-        <h3 className="text-azul-oscuro font-semibold mb-1">Paso 3 — Archivos XML y PDF</h3>
-        <p className={`text-sm ${TEXT_SECONDARY}`}>
-          Sube tu comprobante fiscal en formato XML y su representación en PDF. El sistema
-          verificará que correspondan al mismo comprobante antes de permitir continuar.
-        </p>
-      </div>
-
       {/* Empty state explícito: si falta al menos un archivo */}
       {!xmlFile && !pdfFile && (
         <div

@@ -27,15 +27,6 @@ export function StepConfirmacion({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className={`bg-celeste-soft border border-celeste-subtle rounded-xl p-4`}>
-        <h3 className="text-azul-oscuro font-semibold mb-1">Paso 4 — Confirma y radica</h3>
-        <p className={`text-sm ${TEXT_SECONDARY}`}>
-          Revisa que toda la información sea correcta. Al radicar, la factura se enviará
-          automáticamente al equipo de <strong>Cartera</strong> para su aprobación.
-        </p>
-      </div>
-
       {/* Resumen final */}
       <div className={`bg-white rounded-xl shadow-sm ${BORDER_DEFAULT} border overflow-hidden`}>
         <div className="bg-azul-oscuro text-white px-5 py-3 flex items-center gap-2">

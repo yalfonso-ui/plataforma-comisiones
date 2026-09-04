@@ -63,15 +63,6 @@ export function StepSeleccionOperaciones({
 
   return (
     <div className="space-y-4">
-      {/* Header con guía */}
-      <div className={`bg-celeste-soft border border-celeste-subtle rounded-xl p-4`}>
-        <h3 className="text-azul-oscuro font-semibold mb-1">Paso 1 — Selecciona las operaciones</h3>
-        <p className={`text-sm ${TEXT_SECONDARY}`}>
-          Marca una o más operaciones disponibles para incluirlas en la factura. Puedes
-          seleccionarlas todas con el checkbox de la cabecera.
-        </p>
-      </div>
-
       {/* Toolbar: DateFilter arriba a la derecha + contador */}
       {Toolbar}
 
