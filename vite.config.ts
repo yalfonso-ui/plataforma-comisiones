@@ -73,6 +73,10 @@ function copyNojekyllPlugin() {
 }
 
 export default defineConfig(({ command }) => ({
+  server: {
+    host: true,
+    allowedHosts: true,
+  },
   // En dev: base '/' para que funcione en localhost:5173/ sin subpath.
   // En build: usa VITE_BASE_PATH (por defecto '/plataforma-comisiones/' para GitHub Pages).
   // Esto evita pantalla en blanco en local y mantiene compatibilidad con Pages.
